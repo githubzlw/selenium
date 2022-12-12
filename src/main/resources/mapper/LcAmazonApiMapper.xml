@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.LcAmazonApiMapper">
+
+    <resultMap id="AmazonResult" type="com.zhz.selenium.pojo.ApiResult">
+        <result column="amz_asin" property="amzAsin" />
+        <result column="amz_product_normal_count" property="normalCount" />
+        <result column="amz_product_not_normal_count" property="notNormalCount" />
+        <result column="asin_session" property="asinSession" />
+        <result column="unit_order" property="unitOrder" />
+        <result column="clicks" property="clicks" />
+        <result column="spend" property="spend" />
+        <result column="day7_totalOrders" property="day7TotalOrders" />
+        <result column="Customer_Search_Term" property="customerSearchTerm" />
+        <result column="cpc" property="cpc" />
+        <result column="impressions" property="impressions" />
+    </resultMap>
+
+    <select id="selectRankSearchterm" resultMap="AmazonResult">
+        select product_asin as amz_asin,IFNULL(amz_product_normal_count,0) as amz_product_normal_count,
+        IFNULL(amz_product_not_normal_count,0) as amz_product_not_normal_count
+        from tab_product_location  where keyword=${keyWord}
+        and  DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(search_date)
+    </select>
+
+
+    <select id="selectSalesAsin" resultMap="AmazonResult">
+        select max(c.asin_session) asin_session ,max(c.unit_order) unit_order,sum(a.Clicks) clicks,sum(a.Spend) spend,
+
+        (select sum(Day7_TotalOrders)  Day7_TotalOrders  from  searchterm   where id in (
+        select distinct a.id
+        from searchterm a
+        inner JOIN  (select distinct campaign_id,Advertised_ASIN from  amzasin) b on a.campaign_id=b.campaign_id
+        inner join
+        (select sum(asin_session) asin_session,child_asin,sum(unit_order) unit_order from  sp_api_report   where  child_asin=${asin} and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(create_date)) C on b.Advertised_ASIN=c.child_asin
+        where
+        b.Advertised_ASIN=${asin}
+        and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(a.date)
+        )) as day7_totalOrders
+
+        from searchterm a
+        inner JOIN  (select distinct campaign_id,Advertised_ASIN from  amzasin) b on a.campaign_id=b.campaign_id
+        inner join
+        (select sum(asin_session) asin_session,child_asin,sum(unit_order) unit_order from  sp_api_report   where  child_asin=${asin} and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(create_date)) C on b.Advertised_ASIN=c.child_asin
+        where
+        b.Advertised_ASIN=${asin}
+        and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(a.date)
+        GROUP BY b.Advertised_ASIN
+
+    </select>
+
+    <select id="selectKeywordsAsin" resultMap="AmazonResult">
+
+        select a.Customer_Search_Term,sum(a.Clicks) as clicks,round(sum(a.Spend)/sum(a.Clicks),2) cpc,max(c.unit_order) unit_order,max(tmp_search.Day7_TotalOrders) Day7_TotalOrders,a.impressions
+        from searchterm a
+        inner JOIN  (select distinct campaign_id,Advertised_ASIN from  amzasin) b on a.campaign_id=b.campaign_id
+        inner join
+        (select child_asin,sum(unit_order) unit_order from  sp_api_report   where  child_asin=${asin} and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(create_date)) c
+        on b.Advertised_ASIN=c.child_asin
+        left  join
+
+        (select Customer_Search_Term,Day7_TotalOrders  from  searchterm   where id in (
+        select max(a.id) id
+        from searchterm a
+        inner JOIN amzasin b on a.campaign_id=b.campaign_id
+        inner join sp_api_report c on b.Advertised_ASIN=c.child_asin  and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(c.create_date)
+        where
+        b.Advertised_ASIN=${asin}
+        and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(a.date)
+        GROUP BY b.Advertised_ASIN,a.Customer_Search_Term) ) as tmp_search on tmp_search.Customer_Search_Term=a.Customer_Search_Term
+
+        where
+        b.Advertised_ASIN=${asin}
+        and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(a.date)
+        GROUP BY b.Advertised_ASIN,a.Customer_Search_Term
+        ORDER BY clicks desc
+        limit 20
+        
+    </select>
+
+    <select id="selectRankAsin" resultMap="AmazonResult">
+        select  keyword as  Customer_Search_Term,sum(IFNULL(amz_product_normal_count,0)) as amz_product_normal_count,
+        sum(IFNULL(amz_product_not_normal_count,0)) as amz_product_not_normal_count
+        from tab_product_location  where product_asin=${asin}
+        GROUP BY keyword
+
+    </select>
+
+
+</mapper>
+
+

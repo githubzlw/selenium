@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.NegativeWordConfigMapper">
+
+    <resultMap id="NegativeWordConfig" type="com.zhz.selenium.pojo.NegativeWordConfig">
+        <id column="id" property="id" />
+        <result column="action_name" property="actionName" />
+        <result column="action_remark" property="actionRemark" />
+        <result column="config_id" property="confId" />
+        <result column="search_terms_source" property="searchTermsSource" />
+        <result column="add_to_blacklist" property="addToBlacklist" />
+        <result column="ignore_whitelist" property="ignoreWhitelist" />
+        <result column="keyname" property="ruleName" />
+        <result column="condition" property="condition" />
+    </resultMap>
+
+    <insert id="saveNegativeWord">
+        insert into tab_negative_word_config (action_name, action_remark, config_id,search_terms_source
+        ,add_to_blacklist,ignore_whitelist)
+        VALUES
+        (#{actionName}, #{actionRemark}, #{confId},#{searchTermsSource},#{scope},#{addToBlacklist},#{ignoreWhitelist})
+    </insert>
+
+    <delete id="deleteNegativeWord">
+        delete from tab_negative_word_config where id = #{id}
+    </delete>
+
+    <select id="selectNegativeWord" resultMap="NegativeWordConfig">
+        SELECT negative.*, conf.keyname,conf.`condition`
+        FROM tab_negative_word_config negative
+        left join
+        tab_conf_head conf
+        on conf.id = negative.config_id
+    </select>
+
+
+    <select id="selectNegativeWordDetail" resultMap="NegativeWordConfig">
+        SELECT * FROM `tab_negative_word_config` where id = #{id}
+    </select>
+</mapper>
+
+

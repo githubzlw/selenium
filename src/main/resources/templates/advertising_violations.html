@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>违规广告操作统计</title>
+
+</head>
+<body>
+<div id="list" class="">
+    <div id="campaignList" style="margin-top: 130px">
+        <button onclick="setParam()" value="参数设置">参数设置</button>
+        <div>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">距离上一次出单后，Keyword Target,点击><input id="fa" type="text" th:value="${fa}"/>次没出单</span>
+                <input type="button" onclick="javascript:fa(document.getElementById('fa').value,'a');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="a" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text="" style="cursor: pointer; color:deepskyblue">3日曝光><input id="fb1" type="text" th:value="${fb1}"/>,CTR<<input id="fb2" type="text"  th:value="${fb2}" />%,未出单</span>
+                <input type="button" onclick="javascript:fb(document.getElementById('fb1').value,document.getElementById('fb2').value,'b');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="b" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text="" style="cursor: pointer; color:deepskyblue"><input id="fc1" type="text"  th:value="${fc1}" />次点击没订单，而且CTR<<input id="fc2" type="text"  th:value="${fc2}" />%</span>
+                <input type="button" onclick="javascript:fc(document.getElementById('fc1').value,document.getElementById('fc2').value,'c');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="c" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">单个Search Term词ACOS><input id="fd" type="text"  th:value="${fd}"/>%</span>
+                <input type="button" onclick="javascript:fd(document.getElementById('fd').value,'d');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="d" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">单个Search Term词CTR><input id="fe1" type="text"  th:value="${fe1}" />%,点击><input id="fe2" type="text" th:value="${fe2}" />,转化<<input id="fe3" type="text" th:value="${fe3}" />%</span>
+                <input type="button" onclick="javascript:fe(document.getElementById('fe1').value,document.getElementById('fe2').value,document.getElementById('fe3').value,'e');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="e" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">单个Search Term词点击><input id="ff1" type="text" th:value="${ff1}" />,转化<<input id="ff2" type="text" th:value="${ff2}" />%</span>
+                <input type="button" onclick="javascript:ff(document.getElementById('ff1').value,document.getElementById('ff2').value,'f');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="f" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text="" style="cursor: pointer; color:deepskyblue">点击<input id="fg1" type="text" th:value="${fg1}" />次还没出单的ASIN</span>
+                <input type="button" onclick="javascript:fg(document.getElementById('fg1').value,'g');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="g" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">对广告组的关停整顿预警-价格0-10,ACOS>=<input id="fh1_1" type="text" th:value="${fh1_1}" />%</span>
+                <input type="button" onclick="javascript:fh1(document.getElementById('fh1_1').value,'fh1');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="fh1" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text="" style="cursor: pointer; color:deepskyblue">对广告组的关停整顿预警-价格11-20,ACOS>=<input id="fh2_1" type="text" th:value="${fh2_1}" />%</span>
+                <input type="button" onclick="javascript:fh2(document.getElementById('fh2_1').value,'fh2');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="fh2" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">对广告组的关停整顿预警-价格21-30,ACOS>=<input id="fh3_1" type="text" th:value="${fh3_1}" />%</span>
+                <input type="button" onclick="javascript:fh3(document.getElementById('fh3_1').value,'fh3');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="fh3" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">对广告组的关停整顿预警-价格31-40,ACOS>=<input id="fh4_1" type="text" th:value="${fh4_1}" />%</span>
+                <input type="button" onclick="javascript:fh4(document.getElementById('fh4_1').value,'fh4');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="fh4" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">对广告组的关停整顿预警-价格41-50,ACOS>=<input id="fh5_1" type="text" th:value="${fh5_1}" />%</span>
+                <input type="button" onclick="javascript:fh5(document.getElementById('fh5_1').value,'fh5');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="fh5" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">对广告组的关停整顿预警-价格大于50,ACOS>=<input id="fh6_1" type="text" th:value="${fh6_1}" />%</span>
+                <input type="button" onclick="javascript:fh6(document.getElementById('fh6_1').value,'fh6');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="fh6" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">自动广告点击超过<input id="fi" type="text" th:value="${fi}" />,还没出单</span>
+                <input type="button" onclick="javascript:fi(document.getElementById('fi').value,'i');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="i" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+            <ul>
+                <span text=""  style="cursor: pointer; color:deepskyblue">过去30天,被暂停的组里面有ACOS 很低的 Search Term, 就提醒。ACOS<<input id="fj" type="text" th:value="${fj}" />%</span>
+                <input type="button" onclick="javascript:fj(document.getElementById('fj').value,'j');" value="确认"/>
+                <table border="1px" cellspacing="0px" width="1500"  id="j" class="table" style="display: none;border-style:hidden;">
+
+                </table>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
+<script type="text/javascript" src='js/advertising_violations.js'></script>
+</html>

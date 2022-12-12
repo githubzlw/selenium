@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.NegativeRuleConfigMapper">
+
+    <resultMap id="NegativeRuleConfig" type="com.zhz.selenium.pojo.NegativeRuleConfig">
+        <id column="id" property="id" />
+        <result column="action_name" property="actionName" />
+        <result column="action_remark" property="actionRemark" />
+        <result column="config_id" property="confId" />
+        <result column="search_terms_source" property="searchTermsSource" />
+        <result column="scope" property="scope" />
+        <result column="add_to_blacklist" property="addToBlacklist" />
+        <result column="ignore_whitelist" property="ignoreWhitelist" />
+        <result column="new_negative_type" property="newNegativeType" />
+        <result column="keyname" property="ruleName" />
+        <result column="condition" property="condition" />
+    </resultMap>
+
+    <insert id="saveNegativeRule">
+        insert into tab_negative_rule_config (action_name, action_remark, config_id,search_terms_source,scope
+        ,add_to_blacklist,ignore_whitelist,new_negative_type)
+        VALUES
+        (#{actionName}, #{actionRemark}, #{confId},#{searchTermsSource},#{scope},#{addToBlacklist},#{ignoreWhitelist}
+        ,#{newNegativeType})
+    </insert>
+
+    <delete id="deleteNegativeRule">
+        delete from tab_negative_rule_config where id = #{id}
+    </delete>
+
+    <select id="selectNegativeRule" resultMap="NegativeRuleConfig">
+        SELECT negative.*, conf.keyname,conf.`condition`
+        FROM tab_negative_rule_config negative
+        left join
+        tab_conf_head conf
+        on conf.id = negative.config_id
+    </select>
+
+
+    <select id="selectNegativeRuleDetail" resultMap="NegativeRuleConfig">
+        SELECT negative.*, conf.keyname,conf.`condition`
+        FROM tab_negative_rule_config negative
+        left join
+        tab_conf_head conf
+        on conf.id = negative.config_id where negative.id = #{id}
+    </select>
+</mapper>
+
+

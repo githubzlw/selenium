@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.AmazonFileMapper">
+    <insert id="insertSearchTermData">
+        insert into searchterm (`Date`,Currency,Campaign_Name,Ad_Group_Name,Targeting,
+        Match_Type,Customer_Search_Term,Impressions,Clicks,CTR,CPC,Spend,Day7_TotalSales,
+        TACOS,TROAS,Day7_TotalOrders,Day7_TotalUnits,Day7_ConversionRate,Day7_AdvertisedSKU_Units,Day7_OtherSKU_Units,
+        Day7_Advertised_SKU_Sales,Day7_OtherSKU_Sales,campaign_id,ad_group_id,portfolio_id,keyword_id,keyword_bid)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.date},
+            #{item.campaignBudgetCurrencyCode},
+            #{item.campaignName},
+            #{item.adGroupName},
+            #{item.targeting},
+            #{item.matchType},
+            #{item.searchTerm},
+            #{item.impressions},
+            #{item.clicks},
+            #{item.clickThroughRate},
+            #{item.costPerClick},
+            #{item.cost},
+            #{item.sales7d},
+            #{item.acosClicks7d},
+            #{item.roasClicks7d},
+            #{item.unitsSoldClicks7d},
+            #{item.Day7TotalUnits},
+            #{item.Day7ConversionRate},
+            #{item.unitsSoldSameSku7d},
+            #{item.unitsSoldOtherSku7d},
+            #{item.attributedSalesSameSku7d},
+            #{item.salesOtherSku7d},
+            #{item.campaignId},
+            #{item.adGroupId},
+            #{item.portfolioId},
+            #{item.keywordId},
+            #{item.keywordBid}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="insertAmzData">
+        insert into amzasin (Start_Date,End_Date,Currency,Campaign_Name,Ad_Group_Name,Advertised_SKU,Advertised_ASIN,
+        Impressions,Clicks,CTR,CPC,Spend,Day7_Total_Sales,
+        TACOS,TROAS,Day7_TotalOrders,Day7_TotalUnits,Day7_Conversion_Rate,Day7_AdvertisedSKU_Units,Day7_OtherSKU_Units,
+        Day7_AdvertisedSKUSales,Day7_OtherSKUSales,campaign_id,ad_group_id,portfolio_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.startDate},
+            #{item.endDate},
+            #{item.campaignBudgetCurrencyCode},
+            #{item.campaignName},
+            #{item.adGroupName},
+            #{item.advertisedSku},
+            #{item.advertisedAsin},
+            #{item.impressions},
+            #{item.clicks},
+            #{item.clickThroughRate},
+            #{item.costPerClick},
+            #{item.cost},
+            #{item.sales7d},
+            #{item.acosClicks7d},
+            #{item.roasClicks7d},
+            #{item.unitsSoldClicks7d},
+            #{item.Day7TotalUnits},
+            #{item.Day7ConversionRate},
+            #{item.unitsSoldSameSku7d},
+            #{item.unitsSoldOtherSku7d},
+            #{item.attributedSalesSameSku7d},
+            #{item.salesOtherSku7d},
+            #{item.campaignId},
+            #{item.adGroupId},
+            #{item.portfolioId}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="insertCampaignData">
+        insert into campaign (campaign_id,`name`,campaign_type,targeting_type,premium_bid_adjustment,daily_budget,start_date,
+        state,portfolioId)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.campaignId},
+            #{item.name},
+            #{item.campaignType},
+            #{item.targetingType},
+            #{item.premiumBidAdjustment},
+            #{item.dailyBudget},
+            #{item.startDate},
+            #{item.state},
+            #{item.portfolioId}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="insertAdgroupData">
+        insert into ad_group (adGroup_id,`name`,campaign_id,default_bid,state)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.adGroupId},
+            #{item.name},
+            #{item.campaignId},
+            #{item.defaultBid},
+            #{item.state}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="insertNegativeKeyWordData">
+        insert into negative_keyword (keyword_id,adGroup_id,campaign_id,keyword_text,match_type,state)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.keywordId},
+            #{item.adGroupId},
+            #{item.campaignId},
+            #{item.keywordText},
+            #{item.matchType},
+            #{item.state}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertImportPortfoliosData">
+        insert into portfolios (Portfolio_id,Portfolio_name,In_budget,state)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.portfolioId},
+            #{item.name},
+            #{item.inBudget},
+            #{item.state}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertSpapiData">
+        insert into sp_api_report (create_date,parent_asin,child_asin
+        ,asin_session,unit_order,unit_order_b2b,order_product_sale,order_product_sale_b2b
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{time},
+            #{item.parentAsin},
+            #{item.childAsin},
+            #{item.trafficByAsin.sessions},
+            #{item.salesByAsin.unitsOrdered},
+            #{item.salesByAsin.unitsOrderedB2B},
+            #{item.salesByAsin.orderedProductSales.amount},
+            #{item.salesByAsin.orderedProductSalesB2B.amount}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertSpapiPirceData">
+        insert into asin_price (asin_sku,asin,asin_price
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.sku},
+            #{item.asin},
+            #{item.price}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteDataByTime">
+        delete from searchterm where DATE_FORMAT(date, '%Y-%m-%d')BETWEEN #{startTime} and #{endTime}
+    </delete>
+
+    <delete id="deleteCampaignData">
+        delete from campaign
+    </delete>
+
+    <delete id="deleteAdgroupData">
+        delete from ad_group
+    </delete>
+
+    <delete id="deleteNegativeKeyWordData">
+        delete from negative_keyword
+    </delete>
+
+    <delete id="deleteImportPortfoliosData">
+        delete from portfolios
+    </delete>
+
+    <delete id="deleteSpapiData">
+        delete from sp_api_report where DATE_FORMAT(create_date, '%Y-%m-%d')=#{time}
+    </delete>
+
+    <delete id="deleteSpapiPirceData">
+        delete from asin_price
+    </delete>
+</mapper>
+
+

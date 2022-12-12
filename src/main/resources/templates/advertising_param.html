@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>违规广告操作统计参数设置</title>
+
+</head>
+<body>
+<form name="form" id="formId" action="updateParam">
+    Keyword Target,点击&gt;
+    <input type="text" id="fa" name="fa">
+    次没出单
+    <br>
+    3日曝光&gt;
+    <input type="text" id="fb1" name="fb1">
+    ,CTR&lt;
+    <input type="text" id="fb2" name="fb2">
+    %,未出单
+    <br>
+    <input type="text" id="fc1" name="fc1">
+    次点击没订单，而且CTR&lt;
+    <input type="text" id="fc2" name="fc2">
+    %
+    <br>
+    单个Search Term词ACOS&gt;
+    <input type="text" id="fd" name="fd">
+    %
+    <br>
+    单个Search Term词CTR&gt;
+    <input type="text" id="fe1" name="fe1">
+    %,点击&gt;
+    <input type="text" id="fe2" name="fe2">
+    ,转化&lt;
+    <input type="text" id="fe3" name="fe3">
+    %
+    <br>
+    单个Search Term词点击&gt;
+    <input type="text" id="ff1" name="ff1">
+    ,转化&lt;
+    <input type="text" id="ff2" name="ff2">
+    %
+    <br>
+    点击
+    <input type="text" id="fg1" name="fg1">
+    次还没出单的ASIN
+    <br>
+    对广告组的关停整顿预警-价格0-10,ACOS&gt;=
+    <input type="text" id="fh1_1" name="fh1_1">
+    %
+    <br>
+    对广告组的关停整顿预警-价格11-20,ACOS&gt;=
+    <input type="text" id="fh2_1" name="fh2_1">
+    %
+    <br>
+    对广告组的关停整顿预警-价格21-30,ACOS&gt;=
+    <input type="text" id="fh3_1" name="fh3_1">
+    %
+    <br>
+    对广告组的关停整顿预警-价格31-40,ACOS&gt;=
+    <input type="text" id="fh4_1" name="fh4_1">
+    %
+    <br>
+    对广告组的关停整顿预警-价格41-50,ACOS&gt;=
+    <input type="text" id="fh5_1" name="fh5_1">
+    %
+    <br>
+    对广告组的关停整顿预警-价格大于50,ACOS&gt;=
+    <input type="text" id="fh6_1" name="fh6_1">
+    %
+    <br>
+    <br>
+    自动广告点击超过
+    <input type="text" id="fi" name="fi">
+    ,还没出单
+    <br>
+    <br>
+    如果 一个 过去30天 被暂停的组里面 有 ACOS 很低的 Search Term, 就提醒。ACOS<
+    <input type="text" id="fj" name="fj">
+    %
+    <br>
+    <button type="submit">提交</button>
+</form>
+</body>
+<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
+<!--<script type="text/javascript" src='js/advertising_violations.js'></script>-->
+</html>

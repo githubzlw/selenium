@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.ImportRuleConfigMapper">
+
+    <resultMap id="ImportRuleConfig" type="com.zhz.selenium.pojo.ImportRuleConfig">
+        <id column="id" property="id" />
+        <result column="action_name" property="actionName" />
+        <result column="action_remark" property="actionRemark" />
+        <result column="config_id" property="confId" />
+        <result column="search_terms_source" property="searchTermsSource" />
+        <result column="import_match_type" property="importMatchType" />
+        <result column="average_cpc" property="averageCpc" />
+        <result column="min_bid" property="minBid" />
+        <result column="max_bid" property="maxBid" />
+        <result column="keyname" property="ruleName" />
+        <result column="condition" property="condition" />
+    </resultMap>
+
+    <insert id="saveImportRule">
+        insert into tab_import_rule_config (action_name, action_remark, config_id,search_terms_source,import_match_type
+        ,average_cpc,min_bid,max_bid)
+        VALUES
+        (#{actionName}, #{actionRemark}, #{confId},#{searchTermsSource},#{importMatchType},#{averageCpc},#{minBid}
+        ,#{maxBid})
+    </insert>
+
+    <insert id="insertAdGroupId">
+        insert into import_rule_dictionary (campaign_id,ad_group_id) values (#{campaignId},#{adGroupId})
+    </insert>
+
+    <delete id="deleteImportRule">
+        delete from tab_import_rule_config where id = #{id}
+    </delete>
+
+    <select id="selectImportRule" resultMap="ImportRuleConfig">
+        SELECT import.*, conf.keyname,conf.`condition`
+        FROM tab_import_rule_config import
+        left join
+        tab_conf_head conf
+        on conf.id = import.config_id
+    </select>
+
+    <select id="selectDictionary" resultType="java.util.Map">
+        select * from import_rule_dictionary
+    </select>
+
+    <select id="selectImportRuleDetail" resultMap="ImportRuleConfig">
+        SELECT import.*, conf.keyname,conf.`condition`
+        FROM tab_import_rule_config import
+        left join
+        tab_conf_head conf
+        on conf.id = import.config_id where import.id = #{id}
+    </select>
+</mapper>
+
+

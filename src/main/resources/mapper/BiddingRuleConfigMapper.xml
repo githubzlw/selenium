@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.BiddingRuleConfigMapper">
+
+    <resultMap id="BiddingRuleConfig" type="com.zhz.selenium.pojo.BiddingRuleConfig">
+        <id column="id" property="id" />
+        <result column="action_name" property="actionName" />
+        <result column="action_remark" property="actionRemark" />
+        <result column="keyword_conf_id" property="keywordConfId" />
+        <result column="ad_group_conf_id" property="adgroupConfId" />
+        <result column="campaign_conf_id" property="campaignConfId" />
+        <result column="priorty" property="priorty" />
+        <result column="min_bid" property="minBid" />
+        <result column="max_bid" property="maxBid" />
+        <result column="days_obj_bid" property="daysObjBid" />
+        <result column="adjust_bid_type" property="adjustBidType" />
+        <result column="target_acos" property="targetAcos" />
+        <result column="bid_use_per_click" property="bidUsePerClick" />
+        <result column="max_bid_decrease" property="maxBidDecrease" />
+        <result column="max_bid_increase" property="maxBidIncrease" />
+        <result column="bid_adjustment" property="bidAdjustment" />
+        <result column="keyname" property="ruleName" />
+        <result column="condition" property="condition" />
+        <result column="execute_time" property="executeTime" />
+    </resultMap>
+
+    <insert id="saveBiddingRule">
+        insert into tab_bidding_rule_confing (action_name, action_remark, keyword_conf_id,ad_group_conf_id,campaign_conf_id
+        ,priorty,min_bid,max_bid,days_obj_bid,adjust_bid_type,target_acos,bid_use_per_click,max_bid_decrease
+        ,max_bid_increase,bid_adjustment)
+        VALUES
+        (#{actionName}, #{actionRemark}, #{keywordConfId},#{adgroupConfId},#{campaignConfId},#{priorty},#{minBid}
+        ,#{maxBid}, #{daysObjBid}, #{adjustBidType},#{targetAcos},#{bidUsePerClick},#{maxBidDecrease},#{maxBidIncrease}
+        ,#{bidAdjustment})
+    </insert>
+
+    <update id="updateExeDate">
+        update tab_bidding_rule_confing set execute_time = #{time}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBiddingRule">
+        delete from tab_bidding_rule_confing where id = #{id}
+    </delete>
+
+    <select id="selectBiddingRule" resultMap="BiddingRuleConfig">
+        SELECT bidding.*, conf.keyname,conf.`condition`
+        FROM tab_bidding_rule_confing bidding
+        left join
+        tab_conf_head conf
+        on conf.id =
+        case when bidding.keyword_conf_id is not null
+        then bidding.keyword_conf_id
+        when bidding.ad_group_conf_id is not null
+        then bidding.ad_group_conf_id
+        when bidding.campaign_conf_id is not null
+        then bidding.campaign_conf_id
+        end
+        order by bidding.priorty
+    </select>
+
+
+    <select id="selectBiddingRuleDetail" resultMap="BiddingRuleConfig">
+        SELECT bidding.*, conf.keyname,conf.`condition`
+        FROM tab_bidding_rule_confing bidding
+        left join
+        tab_conf_head conf
+        on conf.id =
+        case when bidding.keyword_conf_id is not null
+        then bidding.keyword_conf_id
+        when bidding.ad_group_conf_id is not null
+        then bidding.ad_group_conf_id
+        when bidding.campaign_conf_id is not null
+        then bidding.campaign_conf_id
+        end
+        where bidding.id = #{id}
+        order by bidding.priorty
+    </select>
+</mapper>
+
+

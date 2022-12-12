@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.StatusRuleConfigMapper">
+
+    <resultMap id="StatusRuleConfig" type="com.zhz.selenium.pojo.StatusRuleConfig">
+        <id column="id" property="id" />
+        <result column="action_name" property="actionName" />
+        <result column="action_remark" property="actionRemark" />
+        <result column="config_id" property="confId" />
+        <result column="new_campaign_status" property="newCampaignStatus" />
+        <result column="new_ad_group_status" property="newAdGroupStatus" />
+        <result column="priority" property="priority" />
+        <result column="search_terms_source" property="searchTermsSource" />
+        <result column="keyname" property="ruleName" />
+        <result column="condition" property="condition" />
+    </resultMap>
+
+    <insert id="saveStatusRule">
+        insert into tab_status_rule_config (action_name, action_remark, config_id,new_campaign_status,new_ad_group_status
+        ,priority,search_terms_source)
+        VALUES
+        (#{actionName}, #{actionRemark}, #{confId},#{newCampaignStatus},#{newAdGroupStatus},#{priority},#{searchTermsSource})
+    </insert>
+
+    <delete id="deleteStatusRule">
+        delete from tab_status_rule_config where id = #{id}
+    </delete>
+
+    <select id="selectStatusRule" resultMap="StatusRuleConfig">
+        SELECT status.*, conf.keyname,conf.`condition`
+        FROM tab_status_rule_config status
+        left join
+        tab_conf_head conf
+        on conf.id = status.config_id
+    </select>
+
+    <select id="selectStatusRuleDetail" resultMap="StatusRuleConfig">
+        SELECT status.*, conf.keyname,conf.`condition`
+        FROM tab_status_rule_config status
+        left join
+        tab_conf_head conf
+        on conf.id = status.config_id where status.id = #{id}
+    </select>
+</mapper>
+
+

@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.AmazonMapper">
+
+    <resultMap id="AmazonResult" type="com.zhz.selenium.pojo.SearchResult">
+        <id column="id" property="id" />
+        <result column="searchid" property="searchId" />
+        <result column="keywordid" property="keyWordId" />
+        <result column="amz_url" property="amzUrl" />
+        <result column="amz_product_name" property="amzProductName" />
+        <result column="amz_product_price" property="amzProductPrice" />
+        <result column="amz_asin" property="amzAsin" />
+        <result column="amz_product_style" property="amzProductStyle" />
+        <result column="amz_product_page" property="amzProductPage" />
+        <result column="amz_product_index" property="amzProductIndex" />
+        <result column="amz_product_img" property="amzProductImg" />
+        <result column="amz_product_star" property="amzProductStar" />
+        <result column="amz_product_review_num" property="amzProductReviewNum" />
+        <result column="amz_product_del" property="amzProductDel" />
+        <result column="amz_product_count" property="count" />
+        <result column="amz_product_normal_count" property="normalCount" />
+        <result column="amz_product_not_normal_count" property="notNormalCount" />
+        <result column="search_date" property="searchDate" />
+        <result column="amz_double_price" property="amzDoublePrice" />
+    </resultMap>
+
+    <resultMap id="AmazonKeyWord" type="com.zhz.selenium.pojo.KeyWord">
+        <id column="id" property="id" />
+        <result column="keyword" property="keyWord" />
+        <result column="adminuser" property="adminuser" />
+        <result column="lastsearchdate" property="lastSearchDate" />
+        <result column="search_count" property="searchCount" />
+        <result column="useState" property="useState" />
+    </resultMap>
+
+    <resultMap id="KeyWordProduct" type="com.zhz.selenium.pojo.KeyWordProduct">
+        <id column="id" property="id" />
+        <result column="keywordid" property="keyWordId" />
+        <result column="amz_product_asin" property="amzAsin" />
+        <result column="amz_product_compete_id" property="competeId" />
+        <result column="amz_product_del" property="isDel" />
+    </resultMap>
+
+    <resultMap id="MyAsin" type="com.zhz.selenium.pojo.MyAsin">
+        <result column="customer_search_term" property="keyWord" />
+        <result column="Advertised_ASIN" property="asin" />
+    </resultMap>
+
+    <resultMap id="CompareProduct" type="com.zhz.selenium.pojo.CompareProduct">
+        <result column="id" property="id" />
+        <result column="keywordid" property="keyWordId" />
+        <result column="amz_product_asin" property="amzProductAsin" />
+        <result column="amz_product_compete_id" property="amzProductCompeteId" />
+        <result column="amz_product_del" property="amzProductDel" />
+        <result column="del_date" property="delDate" />
+    </resultMap>
+
+    <insert id="insertAmazonResult" parameterType="list">
+        insert into tab_search_result (searchid,keywordid,amz_url,amz_product_name,amz_product_price,
+        amz_asin,amz_product_style,amz_product_page,amz_product_index,amz_product_img,amz_product_star,amz_product_review_num,amz_product_del,
+        amz_product_count,amz_product_normal_count,amz_product_not_normal_count,search_date,amz_double_price)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.searchId},
+            #{item.keyWordId},
+            #{item.amzUrl},
+            #{item.amzProductName},
+            #{item.amzProductPrice},
+            #{item.amzAsin},
+            #{item.amzProductStyle},
+            #{item.amzProductPage},
+            #{item.amzProductIndex},
+            #{item.amzProductImg},
+            #{item.amzProductStar},
+            #{item.amzProductReviewNum},
+            #{item.amzProductDel},
+            #{item.count},
+            #{item.normalCount},
+            #{item.notNormalCount},
+            #{item.searchDate},
+            #{item.amzDoublePrice}
+            )
+        </foreach>
+    </insert>
+
+<!--    select * from (-->
+<!--    select distinct * from tab_keyword where DATE_FORMAT(add_date, '%Y-%m-%d') between #{startTime} and #{endTime}-->
+<!--    group by keyword ) a where a.select_flag = 1-->
+
+<!--    select * from (-->
+<!--    select distinct * from tab_keyword where DATE_FORMAT(add_date, '%Y-%m-%d') between #{startTime} and #{endTime}-->
+<!--    group by keyword ) a where a.select_flag = 2-->
+    <select id="queryKeyWord" resultMap="AmazonKeyWord">
+            select * from (
+            select distinct * from tab_keyword where DATE_FORMAT(add_date, '%Y-%m-%d') between #{startTime} and #{endTime}
+            group by keyword ) a where a.select_flag = 2
+        </select>
+
+        <select id="queryMyAsin" resultMap="MyAsin">
+            select distinct s.customer_search_term,a.Advertised_ASIN from searchterm s,amzasin a where a.ad_group_id=s.ad_group_id and a.campaign_id=s.campaign_id
+            ORDER BY s.customer_search_term
+        </select>
+
+    <update id="updateKeyWord" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update tab_keyword
+            <set >
+                <if test="item.searchCount != null" >
+                    search_count = #{item.searchCount},
+                </if>
+                <if test="item.lastSearchDate != null" >
+                    lastsearchdate = #{item.lastSearchDate},
+                </if>
+            </set>
+            where keyword = #{item.keyWord}
+        </foreach>
+    </update>
+
+
+    <insert id="insertSearch" parameterType="com.zhz.selenium.pojo.Search" useGeneratedKeys="true" keyProperty="id">
+        insert into tab_search (keywordid, searchdate, successstate) VALUES(#{keyWordId}, #{searchDate}, #{successState})
+    </insert>
+    <insert id="insertProduct" parameterType="list">
+        insert into tab_product_location (searchid,keywordid,product_asin,product_page,product_index,product_sate,
+        amz_product_count,amz_product_normal_count,amz_product_not_normal_count,keyword,search_date,amz_product_img)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.searchId},
+            #{item.keyWordId},
+            #{item.productAsin},
+            #{item.productPage},
+            #{item.productIndex},
+            #{item.productState},
+            #{item.count},
+            #{item.normalCount},
+            #{item.notNormalCount},
+            #{item.keyWord},
+            #{item.searchDate},
+            #{item.productImg}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertKeyWord">
+        insert into tab_keyword ( keyword ,adminuser,lastsearchdate,search_count,useState,add_date,select_flag) (
+        select a.Customer_Search_Term,a.Portfolio_name ,'0000-00-00 00:00:00','0','0',a.date,ceiling(rand() * 2) from
+        (select * ,sum(Impressions) imp from searchterm where DATE_FORMAT(date, '%Y-%m-%d') between #{startTime} and #{endTime}
+        GROUP BY Customer_Search_Term) a where a.imp>200 )
+    </insert>
+
+    <!--页面-->
+
+    <select id="selectAll" resultMap="AmazonResult">
+        select distinct * from tab_search_result as a where keywordid in (
+        SELECT id from tab_keyword where keyword in(${keyWord})
+        ) and searchid in (
+        select id from tab_search where keywordid in
+            (SELECT id from tab_keyword where keyword in(${keyWord}))
+                and searchdate like #{searchDate}
+        )
+        <if test="rankMethod==0 or rankMethod==1">
+            and amz_product_style =#{rankMethod}
+        </if>
+
+--          and amz_product_del = '1'
+        and #{num} &gt;
+        (select count(*) from tab_search_result
+        where  keywordid=a.keywordid
+            and id &lt; a.id
+        <if test="rankMethod==0 or rankMethod==1">
+            and amz_product_style =#{rankMethod}
+        </if>
+--             and amz_product_del = '1'
+            );
+
+    </select>
+
+    <select id="selectKeyWordIdByKewWord" resultType="java.lang.String">
+        SELECT id from tab_keyword where keyword in(${keyWord})
+    </select>
+
+    <select id="selectSearchIdByKeyWordId" resultType="java.lang.String">
+        select id from tab_search where keywordid in(${keyWordId}) and searchdate like #{searchDate}
+    </select>
+
+    <select id="selectAllProduct" resultMap="AmazonResult">
+        select distinct * from tab_search_result as a where keywordid in (
+            ${keyWordId}
+        ) and searchid in (
+            ${searchId}
+        )
+        <if test="rankMethod==0 or rankMethod==1">
+            and amz_product_style =#{rankMethod}
+        </if>
+        and #{num} &gt;
+        (select count(*) from tab_search_result
+        where  keywordid=a.keywordid and a.searchid = searchid
+        and id &lt; a.id
+        <if test="rankMethod==0 or rankMethod==1">
+            and amz_product_style =#{rankMethod}
+        </if>
+        );
+    </select>
+
+
+
+    <select id="selectCompeteProduct" resultMap="AmazonResult">
+        select * from tab_search_result a where keywordid in (
+        SELECT id from tab_keyword where keyword in(${keyWord})
+        ) and searchid in (
+        select id from tab_search where keywordid in
+        (SELECT id from tab_keyword where keyword in(${keyWord}))
+        and searchdate like #{searchDate}
+        )  and amz_asin = #{asin} limit 1
+
+    </select>
+    <select id="compareCompeteProduct" resultMap="AmazonResult">
+        select * from tab_search_result where id in (${ids})
+        and keywordid in (
+        SELECT id from tab_keyword where keyword in(#{keyWord}))
+        <if test="rankMethod==0 or rankMethod==1">
+            and amz_product_style =#{rankMethod}
+        </if>
+
+    </select>
+    <select id="searchProductIdByAsin" resultType="java.lang.Integer">
+        select distinct keywordid from tab_search_result where amz_asin = #{asin} order by id desc limit 1
+    </select>
+    <select id="selectKeyWordByCpc" resultType="java.lang.String">
+        select distinct st.customer_search_term  from searchterm st,(
+        select
+        customer_search_term,
+        max(DATE)as time,spend
+        from searchterm
+        GROUP BY customer_search_term
+        ORDER BY spend DESC)a where st.customer_search_term=a.customer_search_term and st.date=a.time  ORDER BY st.spend DESC limit 4
+    </select>
+
+
+
+    <select id="selectSearchIdByKeyWordAndTime" resultType="java.util.Map">
+    select id,DATE_FORMAT(searchdate, '%Y-%m-%d') as searchdate from tab_search a where keywordid in (
+            SELECT id from tab_keyword where keyword in(
+                ${keyWord}
+            )
+        ) and searchdate BETWEEN #{startTime} and #{endTime}
+    </select>
+    <select id="selectProduct" resultType="java.util.Map">
+        select id,searchid,keywordid,product_asin,GROUP_CONCAT(amz_product_normal_count) as amz_product_normal_count,
+        GROUP_CONCAT(amz_product_not_normal_count) as amz_product_not_normal_count,amz_product_count
+        from tab_product_location  where searchid in (
+            ${searchId}
+        )and product_asin = #{asin} group by searchid,product_asin
+
+    </select>
+    <select id="selectSearchTermByAsinAndTime" resultType="java.util.Map">
+        select a.date,IFNULL(b.amz_product_normal_count,0)amz_product_normal_count ,IFNULL(b.amz_product_not_normal_count,0) amz_product_not_normal_count,sum(a.Impressions) Impressions,round(sum(a.Spend)/sum(a.Clicks),2) cpc ,sum(a.Day7_TotalOrders) Day7_TotalOrders,a.Campaign_Name
+         from (
+					select s.Campaign_Name,s.customer_search_term,a.Advertised_ASIN,round(s.cpc,2) cpc,s.Impressions,DATE_FORMAT(s.date, '%Y-%m-%d') as date ,s.Day7_TotalOrders,s.campaign_id,s.ad_group_id,s.Clicks,s.Spend
+        from searchterm s,amzasin a where a.ad_group_id=s.ad_group_id and s.customer_search_term = #{keyWord} and a.Advertised_ASIN =#{asin} and
+        s.date BETWEEN #{startTime} and #{endTime}
+			 	and s.campaign_id=#{campaignName}
+				group by date,s.id  ) a
+				left join (
+				select product_asin,sum(amz_product_normal_count) as amz_product_normal_count,
+        sum(amz_product_not_normal_count) as amz_product_not_normal_count,keyword,DATE_FORMAT(search_date, '%Y-%m-%d') as search_date
+        from tab_product_location  where DATE_FORMAT(search_date, '%Y-%m-%d')BETWEEN #{startTime} and #{endTime} and product_asin = #{asin} group by search_date,keyword ) b
+				on a.customer_search_term = b.keyword and a.date= b.search_date
+					group by a.date
+    </select>
+    <select id="selectSearchTermByAsinAndTime1" resultType="java.util.Map">
+	    select a.date,IFNULL(b.amz_product_normal_count,0)amz_product_normal_count ,IFNULL(b.amz_product_not_normal_count,0) amz_product_not_normal_count,a.Impressions,a.cpc,a.Day7_TotalOrders,a.Campaign_Name
+	    from
+        (select  GROUP_CONCAT(Campaign_Name) Campaign_Name,customer_search_term,Advertised_ASIN,
+                            round(sum(Spend)/sum(Clicks),2) cpc,Sum(Impressions) Impressions ,
+                            DATE_FORMAT(date, '%Y-%m-%d') as date ,sum(Day7_TotalOrders) Day7_TotalOrders
+                            from
+														(select s.Campaign_Name,s.Spend,s.Clicks, s.customer_search_term,
+                            a.Advertised_ASIN, round(s.Spend/s.Clicks,2) cpc , s.Impressions Impressions ,
+                            DATE_FORMAT(s.date, '%Y-%m-%d') as date ,s.Day7_TotalOrders Day7_TotalOrders
+                            from searchterm s,amzasin a
+                            where a.ad_group_id=s.ad_group_id and s.customer_search_term = #{keyWord}
+                                and a.Advertised_ASIN =#{asin} and s.date BETWEEN #{startTime} and #{endTime}
+                                group by s.customer_search_term,a.Advertised_ASIN,date) c
+                            group by customer_search_term,Advertised_ASIN,date
+        ) a
+        left join
+        ( select product_asin,sum(amz_product_normal_count) as amz_product_normal_count,
+        sum(amz_product_not_normal_count) as amz_product_not_normal_count,
+        keyword,DATE_FORMAT(search_date, '%Y-%m-%d') as search_date
+        from tab_product_location where DATE_FORMAT(search_date, '%Y-%m-%d')BETWEEN #{startTime} and #{endTime}
+        and product_asin = #{asin} group by search_date,keyword ) b
+        on a.customer_search_term = b.keyword and a.date= b.search_date
+    </select>
+
+
+
+    <select id="selectProductByAsinAndTime" resultType="java.util.Map">
+    select a.keyword,IFNULL(GROUP_CONCAT(a.amz_product_normal_count order by a.search_date),0)  amz_product_normal_count,IFNULL(GROUP_CONCAT(a.amz_product_not_normal_count order by a.search_date),0)  amz_product_not_normal_count
+    from (
+    select sum(amz_product_normal_count) amz_product_normal_count,sum(amz_product_not_normal_count) amz_product_not_normal_count,keyword,search_date from	tab_product_location
+    where product_asin = #{asin} and DATE_FORMAT(search_date, '%Y-%m-%d') = #{startTime}
+    group by keyword,search_date
+    union
+    select sum(amz_product_normal_count) amz_product_normal_count,sum(amz_product_not_normal_count) amz_product_not_normal_count,keyword,search_date from	tab_product_location
+    where product_asin = #{asin} and DATE_FORMAT(search_date, '%Y-%m-%d') = #{endTime}
+    group by keyword,search_date ) a  group by a.keyword
+    </select>
+    <select id="selectSearchTermByKeyWordAndAsin" resultType="java.util.Map">
+        select a.Customer_Search_Term,IFNULL(GROUP_CONCAT(a.impressions order by a.date ),0) as impressions from ((
+	select s.customer_search_term,sum(s.impressions) as impressions,s.date
+	from	searchterm s,amzasin a
+	where a.ad_group_id=s.ad_group_id and a.Advertised_ASIN = #{asin} and DATE_FORMAT(s.date, '%Y-%m-%d') = #{startTime}
+	group by s.customer_search_term,s.date)
+	union
+	(
+	select s.customer_search_term,sum(s.impressions) as impressions,s.date
+	from	searchterm s,amzasin a
+	where a.ad_group_id=s.ad_group_id and a.Advertised_ASIN = #{asin} and DATE_FORMAT(s.date, '%Y-%m-%d') = #{endTime}
+	group by s.customer_search_term,s.date)) a  group by a.Customer_Search_Term
+    </select>
+
+
+
+    <select id="selectCampaignByTime" resultType="java.util.Map">
+    select tmp.*
+     ,IFNULL(max(t.amz_product_img),'') amz_product_img
+    from (
+    select a.*,IFNULL(GROUP_CONCAT(a.Advertised_ASIN order by a.spend1 desc,a.spend2 desc,a.spend3 desc,a.Advertised_ASIN desc),'') Advertised_ASIN1
+     from (
+     SELECT distinct s0.customer_search_term,s0.Campaign_Name,s0.Impressions,round(IFNULL(s1.spend,0),2) spend1,round(IFNULL(s2.spend,0),2) spend2,round(IFNULL(s3.spend,0),2) spend3,IFNULL(max(a.Advertised_ASIN),'') Advertised_ASIN
+     ,IFNULL(s1.acos,0) acos30,IFNULL(s2.acos,0) acos7
+     FROM
+         ( SELECT customer_search_term,max(Campaign_Name) Campaign_Name, Impressions, sum( spend ) spend,campaign_id FROM searchterm WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{startTime}  AND #{endTime}
+           AND Impressions > 200
+        GROUP BY campaign_id ) s0
+        LEFT JOIN
+         (
+         SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id
+         ,IFNULL(round((sum(spend)/sum(Day7_TotalSales))*100,2),0) acos
+         FROM searchterm
+         WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{startTime}  AND #{endTime}
+         GROUP BY campaign_id  ) s1
+         on s0.campaign_id = s1.campaign_id
+         LEFT JOIN (SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id
+          ,IFNULL(round((sum(spend)/sum(Day7_TotalSales))*100,2),0) acos
+          FROM searchterm
+          WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{lasWeekTime}  AND #{endTime}
+          GROUP BY campaign_id  ) s2
+            on s1.campaign_id = s2.campaign_id
+         LEFT JOIN ( SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id  FROM searchterm
+         WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{yesTime}  AND #{yesTime}
+         GROUP BY campaign_id  ) s3 on s2.campaign_id=s3.campaign_id
+         left join amzasin a
+         on s1.campaign_id=a.campaign_id
+         group by s0.Campaign_Name ,a.Advertised_ASIN
+		order by s3.spend desc,s2.spend desc,s1.spend desc,a.Advertised_ASIN desc
+		) a
+		group by a.customer_search_term,a.Campaign_Name,a.Impressions,a.spend1,a.spend2,a.spend3
+		order by a.spend3 desc,a.spend2 desc,a.spend1 desc,a.Advertised_ASIN desc
+		) tmp
+		left join tab_product_location t
+		on tmp.Advertised_ASIN = t.product_asin
+        group by tmp.customer_search_term,tmp.Campaign_Name,tmp.Impressions,tmp.spend1,tmp.spend2,tmp.spend3
+        order by tmp.spend3 desc,tmp.spend2 desc,tmp.spend1 desc,tmp.Advertised_ASIN desc
+    </select>
+<!--    select tmp_search3.*,keywordid,max(ifnull(tab.product_asin,'')) product_asin,  ifnull(tab.amz_product_not_normal_count,0) amz_product_not_normal_count ,ifnull(tab.amz_product_normal_count,0)  amz_product_normal_count,max(ifnull(tab.search_date,'')) search_date,IFNULL(amz_product_img,'') amz_product_img-->
+<!--    from  (-->
+<!--    select DISTINCT-->
+<!--    ifnull(amz.Advertised_ASIN,'') Advertised_ASIN,-->
+<!--    a.Campaign_Name,a.ad__name,b.customer_search_term,b.Impressions,b.Clicks,b.cpc,b.date,b.Day7_TotalOrders,b.TACOS,a.campaign_id,a.ad__id-->
+<!--    from searchterm   a  inner join-->
+<!--    (-->
+<!--    select s.Campaign_Name,s.ad__name,s.customer_search_term,sum(s.Impressions) Impressions,sum(s.Clicks) Clicks,TRUNCATE(sum(s.Spend)/sum(s.Clicks),2) cpc,max(date) date,sum(s.Day7_TotalOrders) Day7_TotalOrders,IFNULL(round((s.spend/s.Day7_TotalSales)*100,2),0) TACOS,s.campaign_id,s.ad_group_id-->
+<!--    from searchterm  s  where  DATE_FORMAT(s.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime} and s.campaign_id=#{campaignId}-->
+<!--    GROUP BY   s.campaign_id,s.ad_group_id,s.customer_search_term-->
+<!--    HAVING Impressions > 200-->
+<!--    )-->
+<!--    b-->
+<!--    on  a.ad_group_id=b.ad_group_id and a.campaign_id = b.campaign_id  and a.customer_search_term=b.customer_search_term-->
+<!--    left join amzasin amz on b.campaign_id = amz.campaign_id and b.ad_group_id = amz.ad_group_id-->
+<!--    where  DATE_FORMAT(a.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}-->
+<!--    group by amz.Advertised_ASIN, a.campaign_id,a.ad_group_id,b.customer_search_term,b.Impressions,b.Clicks,b.cpc-->
+<!--    ) tmp_search3-->
+<!--    left join-->
+<!--    (-->
+<!--    select a.*  from tab_product_location a   inner join (-->
+<!--    select  keyword,product_asin,max(search_date)search_date  from  tab_product_location  tp inner join  (select DISTINCT b.customer_search_term, amz.Advertised_ASIN from  amzasin amz   inner join (select-->
+<!--    a.Campaign_Name,a.ad_group_name,a.customer_search_term,sum(a.Impressions) Impressions,sum(a.Clicks) Clicks,TRUNCATE(sum(a.Spend)/sum(a.Clicks),2) cpc,a.campaign_id,a.ad_group_id-->
+<!--    from searchterm   a  inner join-->
+<!--    (select-->
+<!--    s.Campaign_Name,s.ad_group_name,s.customer_search_term,sum(s.Impressions) Impressions,sum(s.Clicks) Clicks,TRUNCATE(sum(s.Spend)/sum(s.Clicks),2) cpc,s.campaign_id,s.ad_group_id-->
+<!--    from searchterm  s  where  DATE_FORMAT(s.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime} and s.campaign_id=#{campaignId}-->
+<!--    GROUP BY   s.campaign_id,s.ad_group_id,s.customer_search_term-->
+<!--    HAVING Impressions > 200) b-->
+<!--    on  a.ad_group_id=b.ad_group_id and a.campaign_id = b.campaign_id  and a.customer_search_term=b.customer_search_term-->
+<!--    where  DATE_FORMAT(a.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}-->
+<!--    GROUP BY   a.campaign_id,a.ad_group_id,a.customer_search_term) b-->
+<!--    on  amz.ad_group_id=b.ad_group_id and amz.campaign_id = b.campaign_id ) ts4-->
+<!--    on tp.keyword=ts4.customer_search_term and tp.product_asin=ts4.Advertised_ASIN where tp.search_date is not null-->
+<!--    group by  keyword,product_asin) b  on  a.keyword=b.keyword and a.product_asin=b.product_asin and  a.search_date=b.search_date-->
+<!--    )  tab  on  tmp_search3.customer_search_term=tab.keyword-->
+<!--    group by  tmp_search3.campaign_id,tmp_search3.ad_group_id,tmp_search3.customer_search_term,tmp_search3.Impressions,tmp_search3.Clicks,tmp_search3.cpc order by Impressions desc-->
+
+    <select id="selectDataByCampaign" resultType="java.util.Map">
+        select tmp_search3.*,ifnull(tab.product_asin,'') product_asin, ifnull(tab.amz_product_not_normal_count,0) amz_product_not_normal_count ,ifnull(tab.amz_product_normal_count,0) amz_product_normal_count,ifnull(tab.search_date,'') search_date,IFNULL(amz_product_img,'') amz_product_img,tab.keywordid
+        ,ifnull(pro.amz_product_normal_count,'0') amz_product_normal_count1,ifnull(SUBSTR(pro.search_date1 FROM 1 FOR 10),'')search_date1,ifnull(SUBSTR(pro1.search_date2 FROM 1 FOR 10),'')search_date2,
+        ifnull(pro1.amz_product_not_normal_count,'0') amz_product_not_normal_count1
+        from
+        ( select  ifnull(amz.Advertised_ASIN,'') Advertised_ASIN,b.customer_search_term,b.Impressions,b.Clicks,b.cpc,b.date s_date,b.Day7_TotalOrders,b.TACOS,a.campaign_id
+        from searchterm a
+        inner join
+        ( select s.Campaign_Name,s.ad_group_name,s.customer_search_term,sum(s.Impressions) Impressions,sum(s.Clicks) Clicks,TRUNCATE(sum(s.Spend)/sum(s.Clicks),2) cpc,max(date) date,sum(s.Day7_TotalOrders) Day7_TotalOrders,IFNULL(round((sum(s.spend)/sum(s.Day7_TotalSales))*100,2),0) TACOS,s.campaign_id,s.ad_group_id from searchterm s where DATE_FORMAT(s.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        and s.campaign_id=#{campaignId} GROUP BY s.campaign_id,s.customer_search_term HAVING Impressions > 200 ) b
+        on a.campaign_id = b.campaign_id and a.customer_search_term=b.customer_search_term left join amzasin amz
+        on b.campaign_id = amz.campaign_id
+        where DATE_FORMAT(a.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by amz.Advertised_ASIN, a.campaign_id,b.customer_search_term )
+        tmp_search3
+        left join
+        (
+        select tab1.* from
+        (select keywordid,tab_product_location.product_asin ,tab_product_location.keyword ,sum(ifnull(tab_product_location.amz_product_normal_count,'0')) amz_product_normal_count ,sum(ifnull(tab_product_location.amz_product_not_normal_count,'0')) amz_product_not_normal_count,search_date,amz_product_img
+        from tab_product_location
+        where DATE_FORMAT(tab_product_location.search_date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by tab_product_location.product_asin ,tab_product_location.keyword,search_date) tab1,
+        (select tab_product_location.product_asin,max(search_date) search_date ,keyword
+        from tab_product_location
+        where DATE_FORMAT(tab_product_location.search_date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by tab_product_location.product_asin,tab_product_location.keyword ) tab2
+        where  tab1.product_asin=tab2.product_asin and tab1.search_date=tab2.search_date and tab1.keyword= tab2.keyword
+        ) tab
+        on tmp_search3.Customer_Search_Term = tab.keyword and tmp_search3.Advertised_ASIN = tab.product_asin
+        left join
+		(
+		select IFNULL(GROUP_CONCAT(amz_product_normal_count order by search_date ),0) amz_product_normal_count,keyword,product_asin,max(search_date) search_date1
+		from tab_product_location where  DATE_FORMAT( search_date, '%Y-%m-%d' ) BETWEEN #{startTime} and #{endTime}
+		and amz_product_not_normal_count is  null
+		group by keyword,product_asin
+		) pro
+		on tmp_search3.Customer_Search_Term= pro.keyword and tmp_search3.Advertised_ASIN = pro.product_asin
+		left join
+		(
+        select IFNULL(GROUP_CONCAT(amz_product_not_normal_count order by search_date ),0) amz_product_not_normal_count
+        ,keyword,product_asin,max(search_date) search_date2
+		from tab_product_location where  DATE_FORMAT( search_date, '%Y-%m-%d' ) BETWEEN #{startTime} and #{endTime}
+		and amz_product_not_normal_count is not null
+		group by keyword,product_asin
+		) pro1
+		on tmp_search3.Customer_Search_Term= pro1.keyword and tmp_search3.Advertised_ASIN = pro1.product_asin
+        order by Advertised_ASIN desc ,Impressions desc
+    </select>
+    <select id="selectCompareIdByAsinAndKeyWordId" resultType="java.util.Map">
+        select amz_product_compete_id,IFNULL(max_price,'') max_price,IFNULL(min_price,'') min_price from tab_keyword_product where keywordid = #{keyWordId} and amz_product_asin = #{asin} and amz_product_del =0
+    </select>
+    <select id="selectCompareById" resultType="java.util.Map">
+        select id,IFNULL(amz_product_price,0) amz_product_price,amz_product_img, IFNULL(amz_product_count,0) amz_product_count
+        from tab_search_result where id in(${ids})
+    </select>
+
+
+
+    <select id="selectCampaignByDate" resultType="java.util.Map">
+	select  * from(
+				select s.Campaign_Name,a.Advertised_ASIN,s.date ,s.spend,s.ACOS,s.Day7_TotalSales,s.campaignTotal,s.campaign_id,s.ad_group_id from (
+    select  s.Campaign_Name,DATE_FORMAT(s.date, '%Y-%m-%d') as date ,round(sum(s.spend),2) spend,IFNULL(round((sum(s.spend)/sum(s.Day7_TotalSales))*100,2),0) ACOS,round(sum(s.Day7_TotalSales),2) Day7_TotalSales,round((sum(s.Day7_TotalSales)-sum(s.Day7_OtherSKU_Sales)),2)  campaignTotal,s.campaign_id,s.ad_group_id
+				 from searchterm s
+				where s.campaign_id = #{campaignName} and s.date BETWEEN #{startTime} and #{endTime}
+				GROUP BY s.campaign_id,s.date ) s
+				left join amzasin a
+				on a.ad_group_id=s.ad_group_id and a.campaign_id = s.campaign_id
+				 and a.Advertised_ASIN = #{asin}
+				GROUP BY s.campaign_id,s.date) a
+				left join (
+				select amz_asin,DATE_FORMAT(search_date, '%Y-%m-%d') search_date,IFNULL(amz_product_star,0) amz_product_star ,IFNULL(amz_product_review_num,0) amz_product_review_num
+				from tab_search_result
+				where  search_date BETWEEN #{startTime} and #{endTime} ) b
+				on a.Advertised_ASIN= b.amz_asin and a.date = b.search_date
+				GROUP BY a.campaign_id,a.Advertised_ASIN,a.date
+				order by a.date
+	</select>
+
+<!--    SELECT s1.customer_search_term,s1.Campaign_Name,s1.Impressions,round(s1.spend,2) spend1,round(IFNULL(s2.spend,0),2) spend2,round(IFNULL(s3.spend,0),2) spend3 FROM-->
+<!--    (-->
+<!--    SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id FROM searchterm-->
+<!--    WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{startTime}  AND #{endTime}  AND Impressions > 200 and Campaign_Name=#{campaignName} or Portfolio_name = #{portfolio}-->
+<!--    GROUP BY campaign_id  ) s1-->
+<!--    LEFT JOIN (SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id FROM searchterm-->
+<!--    WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{lasWeekTime}  AND #{endTime}  AND Impressions > 200 and Campaign_Name=#{campaignName} or Portfolio_name = #{portfolio}-->
+<!--    GROUP BY campaign_id  ) s2-->
+<!--    on s1.campaign_id = s2.campaign_id and s1.customer_search_term = s2.customer_search_term-->
+<!--    LEFT JOIN ( SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend ,campaign_id FROM searchterm-->
+<!--    WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{yesTime}  AND #{endTime}  AND Impressions > 200 and Campaign_Name=#{campaignName} or Portfolio_name = #{portfolio}-->
+<!--    GROUP BY campaign_id  ) s3 on s2.campaign_id=s3.campaign_id  and s2.customer_search_term = s3.customer_search_term-->
+<!--    order by s3.spend desc,s2.spend desc,s1.spend desc-->
+    <select id="selectCampaignByTimeAndPerson" resultType="java.util.Map">
+ SELECT s0.customer_search_term,s0.Campaign_Name,s0.Impressions,round(IFNULL(s1.spend,0),2) spend1,round(IFNULL(s2.spend,0),2) spend2,round(IFNULL(s3.spend,0),2) spend3 FROM
+ ( SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id FROM searchterm WHERE  Campaign_Name=#{campaignName} or Portfolio_name = #{portfolio}
+   AND Impressions > 200
+GROUP BY Campaign_Name ) s0
+LEFT JOIN
+ (
+ SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id FROM searchterm
+ WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{startTime}  AND #{endTime}
+ GROUP BY Campaign_Name  ) s1
+ on s0.campaign_id = s1.campaign_id -- and s0.customer_search_term = s1.customer_search_term
+ LEFT JOIN (SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id FROM searchterm
+  WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{lasWeekTime}  AND #{endTime}
+  GROUP BY Campaign_Name  ) s2
+	on s1.campaign_id = s2.campaign_id -- and s1.customer_search_term = s2.customer_search_term
+ LEFT JOIN ( SELECT customer_search_term, Campaign_Name, Impressions, sum( spend ) spend,campaign_id  FROM searchterm
+ WHERE DATE_FORMAT( date, '%Y-%m-%d' ) BETWEEN #{yesTime}  AND #{endTime}
+ GROUP BY Campaign_Name  ) s3 on s2.campaign_id=s3.campaign_id  -- and s2.customer_search_term = s3.customer_search_term
+			 order by s3.spend desc,s2.spend desc,s1.spend desc
+    </select>
+
+    <update id="updateKeyWordProduct">
+        update tab_keyword_product set amz_product_del = 1 , del_date = #{date}
+        where amz_product_asin = #{asin} and keywordid = #{keyWordId}
+    </update>
+
+    <insert id="insertKeyWordProduct" parameterType="list">
+        insert into tab_keyword_product (keywordid,amz_product_asin,amz_product_compete_id,amz_product_del,amz_product_compete_asin)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+        (
+        #{item.keyWordId},
+        #{item.amzProductAsin},
+        #{item.amzProductCompeteId},
+        #{item.amzProductDel},
+        #{item.amzProductCompeteAsin}
+        )
+        </foreach>
+    </insert>
+
+    <select id="selectAsinById" resultType="java.util.Map">
+        select id,amz_asin from tab_search_result where id in(${ids})
+    </select>
+
+    <select id="selectCampaignByKeyWordAndAsin" resultType="java.util.Map">
+        select s.Campaign_Name from searchterm s,amzasin a
+				where a.ad_group_id=s.ad_group_id and a.campaign_id = s.campaign_id and s.customer_search_term = #{keyWord} and a.Advertised_ASIN = #{asin}
+				GROUP BY s.Campaign_Name limit 1
+    </select>
+
+
+    <select id="selectAsinByTime" resultType="java.util.Map">
+        SELECT b1.Advertised_ASIN,IFNULL(SUBSTRING(a1.amz_product_name,1,30 ),'') as amz_product_name  ,IFNULL(a1.amz_product_img,'') as amz_product_img FROM (
+			 select ifnull(b.Advertised_ASIN,'') Advertised_ASIN,max(id) id1   from
+				  (select  distinct a.Advertised_ASIN from searchterm s, amzasin a
+				  where   s.campaign_id = a.campaign_id and s.ad_group_id = a.ad_group_id and s.date between #{startTime} and #{endTime} and s.Impressions >200) b   left join      tab_search_result   a  on
+					b.Advertised_ASIN=a.amz_asin group by b.Advertised_ASIN) b1 LEFT JOIN
+			tab_search_result A1 ON b1.id1=  A1.id
+    </select>
+
+<!--    select a.Customer_Search_Term,a.Campaign_Name,IFNULL(b.amz_product_normal_count,0) as twoNormalCount-->
+<!--    ,IFNULL(b.amz_product_not_normal_count,0) as twoNotNormalCount-->
+<!--    ,IFNULL(c.amz_product_normal_count,0) as sevenNormalCount-->
+<!--    ,IFNULL(c.amz_product_not_normal_count,0) as sevenNotNormalCount-->
+<!--    ,IFNULL(d.amz_product_normal_count,0) as fourteenNormalCount-->
+<!--    ,IFNULL(d.amz_product_not_normal_count,0) as fourteenNotNormalCount-->
+<!--    ,IFNULL(e.amz_product_normal_count,0) as tweoNormalCount-->
+<!--    ,IFNULL(e.amz_product_not_normal_count,0) as tweoNotNormalCount-->
+<!--    from (-->
+<!--    select  distinct s.Customer_Search_Term,s.Campaign_Name from searchterm s, amzasin a-->
+<!--    where   s.Campaign_Name = a.Campaign_Name and s.Ad_Group_Name = a.Ad_Group_Name and s.date between #{startTime} and #{date} and s.Impressions >200 and a.Advertised_ASIN = #{asin} ) a-->
+<!--    left join-->
+<!--    tab_product_location b-->
+<!--    on a.Customer_Search_Term = b.keyword and b.product_asin = #{asin} and b.search_date like #{yesTime}-->
+<!--    left join tab_product_location c-->
+<!--    on a.Customer_Search_Term = c.keyword and c.product_asin = #{asin} and c.search_date like #{lasWeekTime}-->
+<!--    left join tab_product_location d-->
+<!--    on a.Customer_Search_Term = d.keyword and d.product_asin = #{asin} and d.search_date like #{twLasWeekTime}-->
+<!--    left join tab_product_location e-->
+<!--    on a.Customer_Search_Term = e.keyword and e.product_asin = #{asin} and e.search_date like #{thrLasWeekTime}-->
+    <select id="selectDataByAsin" resultType="java.util.Map">
+select a.Customer_Search_Term,a.Campaign_Name,IFNULL(b.amz_product_normal_count,0) as twoNormalCount
+					,IFNULL(b.amz_product_not_normal_count,0) as twoNotNormalCount
+					,IFNULL(c.amz_product_normal_count,0) as sevenNormalCount
+					,IFNULL(c.amz_product_not_normal_count,0) as sevenNotNormalCount
+					,IFNULL(d.amz_product_normal_count,0) as fourteenNormalCount
+					,IFNULL(d.amz_product_not_normal_count,0) as fourteenNotNormalCount
+					,IFNULL(e.amz_product_normal_count,0) as tweoNormalCount
+					,IFNULL(e.amz_product_not_normal_count,0) as tweoNotNormalCount
+					from (
+					select  distinct s.Customer_Search_Term,s.Campaign_Name from searchterm s, amzasin a
+					where   s.campaign_id = a.campaign_id and s.ad_group_id = a.ad_group_id and s.date between #{startTime} and #{date} and s.Impressions >200 and a.Advertised_ASIN = #{asin} ) a
+					left join
+					(select IFNULL(GROUP_CONCAT(amz_product_normal_count order by search_date ),0) amz_product_normal_count,IFNULL(GROUP_CONCAT(amz_product_not_normal_count order by search_date ),0) amz_product_not_normal_count,keyword
+					from tab_product_location where product_asin = #{asin} and search_date BETWEEN #{yesTime} and #{date}
+					group by keyword) b
+					on a.Customer_Search_Term = b.keyword
+					left join
+				  (select IFNULL(GROUP_CONCAT(amz_product_normal_count order by search_date ),0) amz_product_normal_count,IFNULL(GROUP_CONCAT(amz_product_not_normal_count order by search_date ),0) amz_product_not_normal_count,keyword
+					from tab_product_location where product_asin = #{asin} and search_date BETWEEN #{lasWeekTime} and #{date}
+					group by keyword)	c
+					on a.Customer_Search_Term = c.keyword
+					left join
+					(select IFNULL(GROUP_CONCAT(amz_product_normal_count order by search_date ),0) amz_product_normal_count,IFNULL(GROUP_CONCAT(amz_product_not_normal_count order by search_date ),0) amz_product_not_normal_count,keyword
+					from tab_product_location where product_asin = #{asin} and search_date BETWEEN #{twLasWeekTime} and #{date}
+					group by keyword) d
+					on a.Customer_Search_Term = d.keyword
+					left join
+					(select IFNULL(GROUP_CONCAT(amz_product_normal_count order by search_date ),0) amz_product_normal_count,IFNULL(GROUP_CONCAT(amz_product_not_normal_count order by search_date ),0) amz_product_not_normal_count,keyword
+					from tab_product_location where product_asin = #{asin} and search_date BETWEEN #{thrLasWeekTime} and #{date}
+					group by keyword) e
+					on a.Customer_Search_Term = e.keyword
+
+    </select>
+
+    <select id="selectAcosByAsin" resultType="java.util.Map">
+		select a.*,case IFNULL(d.Impressions,0) when 0 then '不活跃' else '活跃' end Impressions  from
+        (
+        select a.Customer_Search_Term,round(IFNULL(a.acos,0)*100,2) tacos ,round(IFNULL(b.acos,0)*100,2) acos_7 , round(IFNULL(c.acos,0)*100,2) acos_30,a.Targeting
+        from
+        ( select s.Customer_Search_Term,sum(s.spend)/sum(Day7_TotalSales) acos,s.Targeting from searchterm s, amzasin a where s.campaign_id = a.campaign_id and s.ad_group_id = a.ad_group_id and a.Advertised_ASIN = #{asin} and s.Day7_TotalOrders>0 group by s.Customer_Search_Term ) a
+        left join
+        (select s.Customer_Search_Term,sum(s.spend)/sum(Day7_TotalSales) acos,s.Targeting from searchterm s, amzasin a where s.campaign_id = a.campaign_id and s.ad_group_id = a.ad_group_id and a.Advertised_ASIN = #{asin} and s.Day7_TotalOrders>0 and s.date BETWEEN #{lasWeekTime} and #{date} group by s.Customer_Search_Term ) b
+        on a.Customer_Search_Term=b.Customer_Search_Term
+        left join
+        (select s.Customer_Search_Term,sum(s.spend)/sum(Day7_TotalSales) acos,s.Targeting from searchterm s, amzasin a where s.campaign_id = a.campaign_id and s.ad_group_id = a.ad_group_id and a.Advertised_ASIN = #{asin} and s.Day7_TotalOrders>0 and s.date BETWEEN #{startTime} and #{date} group by s.Customer_Search_Term) c
+        on b.Customer_Search_Term=c.Customer_Search_Term) a
+        left join
+        (select sum(s.Impressions) Impressions,s.Targeting  from searchterm s, amzasin a where s.campaign_id = a.campaign_id and s.ad_group_id = a.ad_group_id
+         and s.date BETWEEN #{lasWeekTime} and #{date}
+        group by s.Targeting) d
+        on a.Targeting=d.Targeting
+    </select>
+
+
+    <select id="selectOverdueData" resultType="java.util.Map">
+        select  tk.id,tk.keyword,tk.lastsearchdate  from tab_keyword tk,(
+        select
+        keyword,
+        max(lastsearchdate)as time
+        from tab_keyword
+        GROUP BY keyword)a
+				where tk.keyword=a.keyword and lastsearchdate!='0000-00-00 00:00:00' and tk.lastsearchdate=a.time
+				group by tk.keyword,tk.id
+    </select>
+
+    <select id="selectDataByCampaignId" resultType="java.lang.String">
+        select campaign_id from searchterm where Campaign_Name = #{name} limit 1
+    </select>
+
+    <select id="selectData" resultType="java.util.Map">
+        SELECT * FROM `tab_search_result` where keywordid=#{keywordId} and amz_asin = #{asin} and amz_product_not_normal_count = #{index} and DATE_FORMAT(search_date, '%Y-%m-%d') = #{date} limit 1
+    </select>
+
+    <select id="selectDataByIndex" resultType="java.util.Map">
+        SELECT * FROM `tab_search_result` where keywordid=#{keywordId}  and DATE_FORMAT(search_date, '%Y-%m-%d') = #{date} and
+        (amz_product_count = #{index1} or amz_product_count = #{index2} or amz_product_count = #{index3} or amz_product_count = #{index4})
+    </select>
+
+    <select id="selectSearchVolume" resultType="java.util.Map">
+        SELECT sum(search_volume) search_volume,keyword_phrase FROM alidata.`cerebro` where DATE_FORMAT(create_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime} group by keyword_phrase
+    </select>
+
+    <select id="selectImgByAsin" resultType="java.lang.String">
+        SELECT max(amz_product_img) amz_product_img FROM `tab_product_location` where product_asin = #{asin}
+    </select>
+
+    <select id="selectDay7Acos" resultType="java.lang.String">
+        select IFNULL(round((sum(spend)/sum(Day7_TotalSales))*100,2),0) acos7
+        from searchterm
+        where campaign_id =#{campaignId} and DATE_FORMAT(date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime} and Customer_Search_Term=#{keyword}
+    </select>
+
+    <select id="selectTacos" resultType="java.util.Map">
+        select IFNULL(round(sum(a.total30),2),0)total30 ,IFNULL(round(sum(b.total7),2),0)total7 from (
+        SELECT sum(order_product_sale)+sum(order_product_sale_b2b) total30,child_asin FROM `sp_api_report` where child_asin in (${asin})
+        and DATE_FORMAT(create_date, '%Y-%m-%d') between #{startTime} and #{yesTime}
+        group by child_asin) a
+        left join (
+        SELECT sum(order_product_sale)+sum(order_product_sale_b2b) total7,child_asin FROM `sp_api_report` where child_asin in (${asin})
+        and DATE_FORMAT(create_date, '%Y-%m-%d') between #{lasWeekTime} and #{yesTime}
+        group by child_asin) b
+        on a.child_asin = b.child_asin
+    </select>
+
+    <select id="selectPriceByAsin" resultType="java.lang.String">
+        select IFNULL(asin_price,0) asin_price from asin_price where asin=#{asin} limit 1
+    </select>
+
+    <select id="selectAsinMsg" resultType="java.util.Map">
+        SELECT DATE_FORMAT(create_date, '%Y-%m-%d') create_date ,asin_session,order_product_sale+order_product_sale_b2b sale
+        FROM `sp_api_report`
+        where child_asin = #{asin} and DATE_FORMAT(create_date, '%Y-%m-%d') between #{startTime} and #{endTime};
+    </select>
+
+    <delete id="deleteOverdueData">
+        delete from tab_search_result
+        where keywordid = #{id} and DATE_FORMAT(search_date, '%Y-%m-%d') between #{startTime} and #{date}
+        and DATE_FORMAT(search_date, '%Y-%m-%d') &lt;#{lastsearchdate}
+    </delete>
+
+</mapper>
+
+

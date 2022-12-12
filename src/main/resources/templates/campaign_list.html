@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>campaign list</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="resources/css/jquery-ui-themes1.css" type="text/css" rel="stylesheet"/>
+    <link href="resources/css/axure_rp_page1.css" type="text/css" rel="stylesheet"/>
+    <link href="data/styles1.css" type="text/css" rel="stylesheet"/>
+    <link href="files/campaign_list/styles.css" type="text/css" rel="stylesheet"/>
+    <script src="resources/scripts/jquery-1.7.1.min.js"></script>
+    <script src="resources/scripts/jquery-ui-1.8.10.custom.min.js"></script>
+    <script src="resources/scripts/prototypePre1.js"></script>
+    <script src="data/document1.js"></script>
+    <script src="resources/scripts/prototypePost1.js"></script>
+    <script src="files/campaign_list/data.js"></script>
+    <script type="text/javascript">
+      $axure.utils.getTransparentGifPath = function() { return 'resources/images/transparent.gif'; };
+      $axure.utils.getOtherPath = function() { return 'resources/Other.html'; };
+      $axure.utils.getReloadPath = function() { return 'resources/reload.html'; };
+    </script>
+  </head>
+  <body>
+    <div id="base" class="">
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u1" class="ax_default heading_1">
+        <div id="u1_div" class=""></div>
+        <div id="u1_text" class="text ">
+<!--          <p><span onclick="change()" style="cursor: pointer;">Campaign List</span></p>-->
+          <p><span>Campaign List</span></p>
+        </div>
+      </div>
+      <div id="text1" class="text ">
+        <p><span>Campaign</span></p>
+        <input class="Campaign" type="text" />
+      </div>
+      <div id="text2" class="text ">
+        <p><span>Portfolio</span></p>
+        <input class="Portfolio" type="text" />
+      </div>
+      <div id="search">
+        <button onclick="search()">搜索</button>
+      </div>
+      <div>
+        <div>开始时间
+        <span  th:text="${startTime}"></span>
+        </div>
+        <div>结束时间
+          <span  th:text="${date}"></span>
+        </div>
+      </div>
+
+      <div id="campaignList" style="margin-top: 130px">
+          <div>
+              <ul th:each="t,it: ${list}">
+                  <span th:text="${t.Campaign_Name}" th:onclick='f([[${t.Campaign_Name}]],[[${it.index}]])' style="cursor: pointer; color:deepskyblue"></span>
+                  <span th:text="${t.Advertised_ASIN1}" style="color:orange"></span>
+                  <span th:text="昨日花费：+${t.spend3}" style="color:deepskyblue"></span>
+                  <span th:text="过去七日花费：+${t.spend2}" style="color:deepskyblue"></span>
+                  <span th:text="ACOS：+${t.acos7}" style="color:#FFD700"></span>
+                  <span th:text="TACOS：+${t.tacos7}" style="color:#FFD700"></span>
+                  <span th:text="|过去30天花费：${t.spend1}" style="color:deepskyblue"></span>
+                  <span th:text="ACOS：+${t.acos30}" style="color:#FFD700"></span>
+                  <span th:text="TACOS：+${t.tacos30}" style="color:#FFD700"></span>
+                  <img th:src="${t.amz_product_img}" style="width: 70px" />
+                  <table border="1px" cellspacing="0px" width="2000px"  th:id="${it.index}" class="table" style="display: none;border-style:hidden;">
+
+                  </table>
+              </ul>
+          </div>
+      </div>
+      <div style="margin-top: 130px">
+        <div id="campaignList1">
+        </div>
+      </div>
+
+
+
+    </div>
+  </body>
+  <script type="text/javascript" src='js/campaign_list.js'></script>
+</html>

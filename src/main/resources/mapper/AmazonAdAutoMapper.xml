@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.AmazonAdAutoMapper">
+    <insert id="insertLog">
+        insert into auto_ad_log (logs,add_time) values (#{logs},#{time})
+    </insert>
+
+    <select id="selectNoOrderKeyWord" resultType="java.util.Map">
+        select distinct a.*,b.Advertised_ASIN,c.`name`,e.Portfolio_name from
+        (SELECT sum(Day7_TotalOrders) num,Customer_Search_Term,sum(Clicks) sclick ,campaign_id,ad_group_id FROM `searchterm`
+        group by Customer_Search_Term,campaign_id,ad_group_id HAVING num = 0 and sclick > 11) a
+		left join amzasin b
+		on a.ad_group_id = b.ad_group_id and a.campaign_id=b.campaign_id
+		left join campaign c
+		on a.campaign_id = c.campaign_id
+		left join portfolios e
+		on c.portfolioId = e.Portfolio_id
+		where c.name is not null
+    </select>
+
+
+    <select id="selectRecentNoOrderKeyWord" resultType="java.util.Map">
+        select distinct a.*,b.*,c.Advertised_ASIN,d.`name`,e.Portfolio_name from
+        (select sum(Day7_TotalOrders) num,Customer_Search_Term,date,campaign_id,ad_group_id FROM `searchterm` group by Customer_Search_Term HAVING num > 1 ) a
+        inner join
+        (SELECT sum(Day7_TotalOrders) num,Customer_Search_Term,sum(Clicks) sclick ,max(date),campaign_id,ad_group_id
+        FROM `searchterm` where DATE_FORMAT(date, '%Y-%m-%d') between #{startTime} and #{endTime}
+        group by Customer_Search_Term HAVING num = 0 and sclick > 20) b
+        on a.campaign_id = b.campaign_id and a.ad_group_id=b.ad_group_id and a.Customer_Search_Term = b.Customer_Search_Term
+		left join amzasin c
+		on a.ad_group_id = c.ad_group_id and a.campaign_id=c.campaign_id
+		left join campaign d
+		on a.campaign_id = d.campaign_id
+		left join portfolios e
+		on d.portfolioId = e.Portfolio_id
+		where d.name is not null
+    </select>
+
+<!--    select distinct a.*,e.Portfolio_name,c.Advertised_ASIN from (-->
+<!--    SELECT sum(s.Day7_TotalOrders) num,sum(s.Clicks) sclick ,s.campaign_id,s.ad_group_id ,c.`name`,s.Ad_Group_Name,c.portfolioId-->
+<!--    FROM `searchterm` s,campaign c-->
+<!--    WHERE  s.campaign_id=c.campaign_id and c.targeting_type = 'auto'-->
+<!--    group by s.campaign_id,s.ad_group_id-->
+<!--    HAVING num = 0 and sclick > 3-->
+<!--    ) a-->
+<!--    left join amzasin c-->
+<!--    on a.ad_group_id = c.ad_group_id and a.campaign_id=c.campaign_id-->
+<!--    left join portfolios e-->
+<!--    on a.portfolioId = e.Portfolio_id-->
+    <select id="selectNoOrderAsin" resultType="java.util.Map">
+        select distinct a.*,b.Advertised_ASIN,c.`name`,e.Portfolio_name from
+        (SELECT sum(Day7_TotalOrders) num,Customer_Search_Term,sum(Clicks) sclick ,campaign_id,ad_group_id FROM `searchterm`
+        group by Customer_Search_Term,campaign_id,ad_group_id HAVING num = 0 and sclick > 3) a
+		left join amzasin b
+		on a.ad_group_id = b.ad_group_id and a.campaign_id=b.campaign_id
+		left join campaign c
+		on a.campaign_id = c.campaign_id
+		left join portfolios e
+		on c.portfolioId = e.Portfolio_id
+		where c.name is not null
+    </select>
+
+
+<!--    select a.*,b.* from-->
+<!--    (-->
+<!--    select distinct a.*,e.Portfolio_name,c.Advertised_ASIN from (-->
+<!--    SELECT sum(s.Day7_TotalOrders) num,sum(s.Clicks) sclick ,s.campaign_id,s.ad_group_id ,c.`name`,s.Ad_Group_Name,c.portfolioId-->
+<!--    FROM `searchterm` s,campaign c-->
+<!--    WHERE  s.campaign_id=c.campaign_id and c.targeting_type = 'auto'-->
+<!--    group by s.campaign_id,s.ad_group_id-->
+<!--    HAVING num >0-->
+<!--    ) a-->
+<!--    left join amzasin c-->
+<!--    on a.ad_group_id = c.ad_group_id and a.campaign_id=c.campaign_id-->
+<!--    left join portfolios e-->
+<!--    on a.portfolioId = e.Portfolio_id-->
+<!--    )a-->
+<!--    inner join-->
+<!--    (select distinct a.*,c.Advertised_ASIN from (-->
+<!--    SELECT sum(s.Day7_TotalOrders) num,sum(s.Clicks) sclick ,s.campaign_id,s.ad_group_id ,c.`name`,s.Ad_Group_Name,c.portfolioId-->
+<!--    FROM `searchterm` s,campaign c-->
+<!--    WHERE  s.campaign_id=c.campaign_id and c.targeting_type = 'auto' and DATE_FORMAT(s.date, '%Y-%m-%d') between #{startTime} and #{endTime}-->
+<!--    group by s.campaign_id,s.ad_group_id-->
+<!--    HAVING num = 0 and sclick > 5-->
+<!--    ) a-->
+<!--    left join amzasin c-->
+<!--    on a.ad_group_id = c.ad_group_id and a.campaign_id=c.campaign_id-->
+<!--    ) b-->
+<!--    on a.campaign_id=b.campaign_id and a.ad_group_id=b.ad_group_id and a.Advertised_ASIN = b.Advertised_ASIN-->
+    <select id="selectRecentNoOrderAsin" resultType="java.util.Map">
+        select distinct a.*,b.*,c.Advertised_ASIN,d.`name`,e.Portfolio_name from
+        (select sum(Day7_TotalOrders) num,Customer_Search_Term,date,campaign_id,ad_group_id FROM `searchterm` group by Customer_Search_Term HAVING num > 1 ) a
+        inner join
+        (SELECT sum(Day7_TotalOrders) num,Customer_Search_Term,sum(Clicks) sclick ,max(date),campaign_id,ad_group_id
+        FROM `searchterm` where DATE_FORMAT(date, '%Y-%m-%d') between #{startTime} and #{endTime}
+        group by Customer_Search_Term HAVING num = 0 and sclick > 5) b
+        on a.campaign_id = b.campaign_id and a.ad_group_id=b.ad_group_id and a.Customer_Search_Term = b.Customer_Search_Term
+		left join amzasin c
+		on a.ad_group_id = c.ad_group_id and a.campaign_id=c.campaign_id
+		left join campaign d
+		on a.campaign_id = d.campaign_id
+		left join portfolios e
+		on d.portfolioId = e.Portfolio_id
+		where d.name is not null
+    </select>
+
+    <select id="selectLog" resultType="java.util.Map">
+        select logs,left(add_time,10) add_time from auto_ad_log order by  id desc
+    </select>
+
+    <select id="selectWhiteAsin" resultType="java.util.Map">
+        select distinct msg from asin_white
+    </select>
+
+    <select id="selectConverionRateOrCTR" resultType="java.util.Map">
+        select distinct a.*,c.`name`,e.Portfolio_name
+--         ,b.Advertised_ASIN
+        from
+        (SELECT IFNULL(round((sum(Clicks)/sum(Impressions))*100,2),0) ctr,Customer_Search_Term,IFNULL(round((sum(Day7_TotalOrders)/sum(Clicks))*100,2),0) conversionRate ,campaign_id,ad_group_id,
+        IFNULL(round((sum(spend)/sum(Day7_TotalSales))*100,2),0) acos FROM `searchterm` where DATE_FORMAT(date, '%Y-%m-%d') between #{startTime} and #{endTime}
+        group by Customer_Search_Term,campaign_id,ad_group_id HAVING acos > 50 and (conversionRate &lt;  3 or ctr &lt;  0.2 )) a
+--         left join amzasin b
+--         on a.ad_group_id = b.ad_group_id and a.campaign_id=b.campaign_id
+        left join campaign c
+        on a.campaign_id = c.campaign_id
+        left join portfolios e
+        on c.portfolioId = e.Portfolio_id
+        where c.name is not null
+    </select>
+
+    <select id="selectSkuByAsin" resultType="java.lang.String">
+        SELECT asin_sku FROM asin_price where asin = #{asin} limit 1;
+    </select>
+
+</mapper>
+
+

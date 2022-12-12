@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.RuleConfigMapper">
+    <resultMap id="RuleConfig" type="com.zhz.selenium.pojo.RuleConfig">
+        <id column="id" property="id" />
+        <result column="keyname" property="keyName" />
+        <result column="remark" property="remark" />
+        <result column="create_time" property="createTime" />
+        <result column="create_user" property="createUser" />
+        <result column="update_time" property="updateTime" />
+        <result column="update_user" property="updateUser" />
+        <result column="del_state" property="delState" />
+        <result column="condition" property="condition" />
+    </resultMap>
+
+    <resultMap id="RuleConfigDetail" type="com.zhz.selenium.pojo.RuleConfigDetail">
+        <result column="id" property="id" />
+        <result column="keyid" property="keyId" />
+        <result column="impressio_min" property="impressionMin" />
+        <result column="impressio_max" property="impressionMax" />
+        <result column="clicks_min" property="clicksMin" />
+        <result column="clicks_max" property="clicksMax" />
+        <result column="orders_min" property="ordersMin" />
+        <result column="orders_max" property="ordersMax" />
+        <result column="units_min" property="unitsMin" />
+        <result column="units_max" property="unitsMax" />
+        <result column="cpc_min" property="cpcMin" />
+        <result column="cpc_max" property="cpcMax" />
+        <result column="ctr_min" property="ctrMin" />
+        <result column="ctr_max" property="ctrMax" />
+        <result column="conversion_min" property="conversionMin" />
+        <result column="conversion_max" property="conversionMax" />
+        <result column="acos_min" property="acosMin" />
+        <result column="acos_max" property="acosMax" />
+        <result column="roas_min" property="roasMin" />
+        <result column="roas_max" property="roasMax" />
+        <result column="spend_min" property="spendMin" />
+        <result column="spend_max" property="spendMax" />
+        <result column="sales_min" property="salesMin" />
+        <result column="sales_max" property="salesMax" />
+        <result column="date_during" property="dateDuring" />
+    </resultMap>
+
+    <insert id="saveRuleConfig" parameterType="com.zhz.selenium.pojo.RuleConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into tab_conf_head (keyname, remark, create_time,create_user,update_time,update_user,del_state,`condition`)
+        VALUES
+        (#{keyName}, #{remark}, #{createTime},#{createUser},#{updateTime},#{updateUser},#{delState},#{condition})
+    </insert>
+
+    <insert id="saveRuleConfigDetail">
+        insert into tab_conf_details (keyid, impressio_min, impressio_max,clicks_min,clicks_max,orders_min,orders_max
+        ,units_min,units_max,cpc_min,cpc_max,ctr_min,ctr_max,conversion_min,conversion_max,acos_min,acos_max,roas_min
+        ,roas_max,spend_min,spend_max,sales_min,sales_max,date_during)
+        VALUES
+        (#{keyId}, #{impressionMin}, #{impressionMax},#{clicksMin},#{clicksMax},#{ordersMin},#{ordersMax}
+        ,#{unitsMin}, #{unitsMax}, #{cpcMin},#{cpcMax},#{ctrMin},#{ctrMax},#{conversionMin}
+        ,#{conversionMax}, #{acosMin}, #{acosMax},#{roasMin},#{roasMax},#{spendMin},#{spendMax},#{salesMin},#{salesMax}
+        ,#{dateDuring})
+    </insert>
+
+    <update id="updateConfig">
+        update tab_conf_head set update_time = #{updateTime} , keyname = #{keyName}
+        where id = #{id}
+    </update>
+
+    <update id="deleteConfig">
+        update tab_conf_head set del_state = 0 ,update_time = #{date}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteConfigDetail">
+        delete from tab_conf_details where keyid = #{id}
+    </delete>
+
+    <select id="selectConfig" resultMap="RuleConfig">
+        select * from tab_conf_head where del_state = 1
+    </select>
+
+    <select id="selectConfigDetail" resultMap="RuleConfigDetail">
+        select * from tab_conf_details where keyid = #{id}
+    </select>
+
+    <select id="selectConfigDetailData" resultType="java.util.Map">
+        select a.* from (
+        select ${field} from ${table}
+        where 1=1
+        <if test="where != null and where != ''">
+        and ${where}
+        </if>
+        group by ${group}
+        <if test="having != null and having != ''">
+            ${having}
+        </if>
+        ) a
+        inner join campaign c
+        on a.campaign_id = c.campaign_id and c.state = 'enabled'
+    </select>
+
+    <select id="selectConfigIdByRuleId" resultType="java.util.Map">
+        select ${field} from ${table} where id = #{id}
+    </select>
+
+    <select id="selectKeywordInfluenceData" resultType="java.util.Map">
+        select campaign_id,ad_group_id,max(Campaign_Name) Campaign_Name,max(Ad_Group_Name) Ad_Group_Name
+        from searchterm
+        where DATE_FORMAT(date, '%Y-%m-%d' ) BETWEEN #{startTime}  AND #{endTime} and Customer_Search_Term = #{searchTerm}
+        group by campaign_id,ad_group_id
+    </select>
+
+    <select id="selectTargetingInfluenceData" resultType="java.util.Map">
+        select campaign_id,ad_group_id,max(Campaign_Name) Campaign_Name,max(Ad_Group_Name) Ad_Group_Name
+        from searchterm
+        where DATE_FORMAT(date, '%Y-%m-%d' ) BETWEEN #{startTime}  AND #{endTime} and Targeting = #{targeting}
+        group by campaign_id,ad_group_id
+    </select>
+
+</mapper>
+
+

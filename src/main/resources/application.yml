@@ -1,0 +1,35 @@
+spring:
+  datasource:
+#    password: root@123
+#    username: root
+    password: ZP3OtheZ0nvqORpY1fpOwQ==
+    username: vxiPSdZfapc=
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://112.64.174.34:23306/world?autoReconnect=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&useUnicode=true&useSSL=false&allowMultiQueries=true
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 100
+      idle-timeout: 60000
+      max-lifetime: 120000
+      login-timeout: 3000
+      validation-timeout: 3000
+      connection-timeout: 30000
+  profiles:
+    include:
+      - cfgPrefixPlatIds
+    thymeleaf:
+      prefix:
+        classpath: /templates   # 访问template下的html⽂件需要配置模板，映射
+      cache: false # 开发时关闭缓存,不然没法看到实时页⾯
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+threadpool:
+  # 核心线程池数
+  corePoolSize: 12
+  #最大线程
+  maxPoolSize: 50
+  #队列容量
+  queueCapacity: 1000
+logging:
+  level:
+    com.zhz.selenium.mapper: debug

@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>search term compare</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="resources/css/jquery-ui-themes1.css" type="text/css" rel="stylesheet"/>
+    <link href="resources/css/axure_rp_page1.css" type="text/css" rel="stylesheet"/>
+    <link href="data/styles1.css" type="text/css" rel="stylesheet"/>
+    <link href="files/search_term_compare/styles.css" type="text/css" rel="stylesheet"/>
+    <script src="resources/scripts/jquery-1.7.1.min.js"></script>
+    <script src="resources/scripts/jquery-ui-1.8.10.custom.min.js"></script>
+    <script src="resources/scripts/prototypePre1.js"></script>
+    <script src="data/document1.js"></script>
+    <script src="resources/scripts/prototypePost1.js"></script>
+    <script src="files/search_term_compare/data.js"></script>
+    <script type="text/javascript">
+      $axure.utils.getTransparentGifPath = function() { return 'resources/images/transparent.gif'; };
+      $axure.utils.getOtherPath = function() { return 'resources/Other.html'; };
+      $axure.utils.getReloadPath = function() { return 'resources/reload.html'; };
+    </script>
+  </head>
+  <body>
+    <div id="base" class="">
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u60" >
+        <table border="0px" cellspacing="0px" width="750px" height="30px" id="table" >
+
+        </table>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u61" class="ax_default heading_1">
+        <div id="u61_div" class=""></div>
+        <div id="u61_text" class="text ">
+          <p><span>Search Term Compare</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u62" class="ax_default label">
+        <div id="u62_div" class=""></div>
+        <div id="u62_text" class="text ">
+          <p><span>请输入ASIN：</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Text Field) -->
+      <div id="u63" class="ax_default text_field">
+        <input id="u63_input" type="text"/>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u64" class="ax_default label">
+        <div id="u64_div" class=""></div>
+        <div id="u64_text" class="text ">
+          <p><span>请选择对比日期：</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Text Field) -->
+      <div id="u65" class="ax_default text_field">
+        <input id="u65_input" type="date" />
+      </div>
+
+      <!-- Unnamed (Text Field) -->
+      <div id="u66" class="ax_default text_field">
+        <input id="u66_input" type="date" />
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u67" class="ax_default label">
+        <div id="u67_div" class=""></div>
+        <div id="u67_text" class="text ">
+          <p><span>VS</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u68" class="ax_default primary_button" onclick="compare()">
+        <div id="u68_div" class=""></div>
+        <div id="u68_text" class="text ">
+          <p><span>比较</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Horizontal Line) -->
+      <div id="u69" class="ax_default line">
+        <img id="u69_img" class="img " src="images/search_term_compare/u69.png"/>
+      </div>
+
+    </div>
+  </body>
+  <script type="text/javascript" src='js/search_term_compare.js'></script>
+  <script type="text/javascript">
+
+
+    var ddd = new Date();
+    var day =ddd.getDate();
+
+    if(ddd.getMonth()<10){
+      var month = "0"+(ddd.getMonth()+1);
+    }
+
+    if(ddd.getDate()<10){
+      day = "0"+ddd.getDate();
+    }
+
+    var datew = ddd.getFullYear()+"-"+month+"-"+day;
+    var datew = datew.toString();
+
+    $("#u65_input").val(datew);
+    $("#u66_input").val(datew);
+
+  </script>
+</html>

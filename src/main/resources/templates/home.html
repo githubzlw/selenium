@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Home</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="resources/css/jquery-ui-themes.css" type="text/css" rel="stylesheet"/>
+    <link href="resources/css/axure_rp_page.css" type="text/css" rel="stylesheet"/>
+    <link href="data/styles.css" type="text/css" rel="stylesheet"/>
+    <link href="files/home/styles.css" type="text/css" rel="stylesheet"/>
+    <link href="css/index-add.css" type="text/css" rel="stylesheet"/>
+    <script src="resources/scripts/jquery-1.7.1.min.js"></script>
+    <script src="resources/scripts/jquery-ui-1.8.10.custom.min.js"></script>
+    <script src="resources/scripts/prototypePre.js"></script>
+    <script src="data/document.js"></script>
+    <script src="resources/scripts/prototypePost.js"></script>
+    <script src="files/home/data.js"></script>
+    <script type="text/javascript">
+      $axure.utils.getTransparentGifPath = function() { return 'resources/images/transparent.gif'; };
+      $axure.utils.getOtherPath = function() { return 'resources/Other.html'; };
+      $axure.utils.getReloadPath = function() { return 'resources/reload.html'; };
+    </script>
+  </head>
+  <body>
+    <div id="base" class="">
+      <button onclick="advertisingViolation()">违规广告</button>
+      <button onclick="campaign_list()">Campaign List</button>
+      <button onclick="search_term_compare()">Search Term Compare</button>
+      <button onclick="ad_logs()">Ad Logs</button>
+      <a href="http://58.37.60.47:10024/cbtconsole/cerebro/cerebroUpList">
+        <button>Cerebro</button>
+      </a>
+      <a href="/Bulk_Campaign.html">
+        <button>自动创建广告组</button>
+      </a>
+      <a href="/Defense_Asin.html">
+        <button>防御Asin广告</button>
+      </a>
+      <!-- Unnamed (Rectangle) -->
+      <div id="u0" class="ax_default label">
+        <div id="u0_div" class=""></div>
+        <div id="u0_text" class="text ">
+          <p><span>搜索日期：</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u1" class="ax_default box_1">
+        <input id="u1_div" type="date" value="">
+      </div>
+
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u3" class="ax_default label">
+        <div id="u3_div" class=""></div>
+        <div id="u3_text" class="text ">
+          <p><span>关键词：</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u4" class="ax_default primary_button">
+        <div id="u4_div" class=""></div>
+        <div id="u4_text" class="text " onclick="search()">
+          <p><span>搜索</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Horizontal Line) -->
+      <div id="u5" class="ax_default line">
+        <img id="u5_img" class="img " src="/images/home/u5.png"/>
+      </div>
+
+      <!-- Unnamed (Text Field) -->
+      <div id="u6" class="ax_default text_field" onkeydown="keySearch()">
+        <input id="u6_input" type="text" th:value="${keyWord}" placeholder="&nbsp;&nbsp;&nbsp; 最多10个关键词，关键词与关键词之间用“;”分开，例如pasta;black"   />
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u7" class="ax_default ax_default_hidden" style="display:none; visibility: hidden" data-left="0" data-top="0" data-width="0" data-height="0">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u8" class="ax_default box_2">
+          <div id="u8_div" class=""></div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u9" class="ax_default label">
+          <div id="u9_div" class=""></div>
+          <div id="u9_text" class="text ">
+            <p><span>关键词</span></p>
+          </div>
+        </div>
+
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u10" class="ax_default label">
+          <div id="u10_div" class=""></div>
+          <div id="u10_text" class="text" style="width: 1100px">
+            <p><span></span></p>
+          </div>
+        </div>
+
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u11" class="ax_default label">
+          <div id="u11_div" class=""></div>
+          <div id="u11_text" class="text ">
+            <p><span>我司商品ASIN</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Text Field) -->
+        <div id="u12" class="ax_default text_field">
+          <input id="u12_input" type="text"placeholder="&nbsp;请输入ASIN"/>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u13" class="" onclick="competeProduct()">
+          <div id="u13_div" class=""></div>
+          <div id="u13_text" class="text ">
+            <p><span>竞品价格分析</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u14" class="ax_default primary_button" onclick="ranking()">
+          <div id="u14_div" class=""></div>
+          <div id="u14_text" class="text ">
+            <p><span>关键词排名分析</span></p>
+          </div>
+        </div>
+
+        <div id="chech_al" style="margin-top: 220px;margin-left: 20px;">
+          <input id="check_all" type="checkbox" onclick="c()"/>全选
+        </div>
+
+
+        <!-- Unnamed (Image) -->
+        <div id="u15" class="ax_default image">
+        </div>
+
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u38" class="ax_default label">
+        <div id="u38_div" class=""></div>
+        <div id="u38_text" class="text ">
+          <p><span>排名方式：</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Droplist) -->
+      <div id="u39" class="ax_default droplist">
+        <select id="u39_input">
+          <option selected value="3">&nbsp; 搜索排名+广告排名</option>
+          <option value="0">&nbsp; 只显示搜索排名</option>
+          <option value="1">&nbsp; 只显示广告排名</option>
+        </select>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u40" class="ax_default label">
+        <div id="u40_div" class=""></div>
+        <div id="u40_text" class="text ">
+          <p><span>展示数量：</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Droplist) -->
+      <div id="u41" class="ax_default droplist">
+        <input id="u41_input" type="text" />
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript" src='js/home.js'></script>
+<!--  <script src='/js/jquery-1.11.1.min.js'></script>-->
+<!--  <script src="/js/bootstrap.min.js"></script>-->
+  <script type="text/javascript" src="/js/jquery.lazyload.min.js"></script>
+  <script type="text/javascript">
+
+    // 懒加载
+    // $("img.lazy").lazyload({effect: "fadeIn"});
+
+    var ddd = new Date();
+    var day =ddd.getDate();
+
+    if(ddd.getMonth()<10){
+      var month = "0"+(ddd.getMonth()+1);
+    }
+
+    if(ddd.getDate()<10){
+      day = "0"+ddd.getDate();
+    }
+
+    var datew = ddd.getFullYear()+"-"+month+"-"+day;
+    var datew = datew.toString();
+
+    $("#u1_div").val(datew);
+
+
+  </script>
+</html>

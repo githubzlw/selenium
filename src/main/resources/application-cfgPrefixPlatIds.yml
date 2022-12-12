@@ -1,0 +1,24 @@
+ids:
+  platIds:
+    -   promoteClass: sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 AdHolder sg-col s-widget-spacing-small sg-col-4-of-20
+        normalClass: sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 sg-col s-widget-spacing-small sg-col-4-of-20
+#        productNameClass: a-size-base-plus
+        productNameClass: a-text-normal
+        productUrlClass: a-link-normal
+        productPriceClass: a-price
+        productAsinClass: data-asin
+        productPhotoClass: s-image
+        productStarArowClass: a-size-small
+        productStarArowAttributeClass: aria-label
+        productReviewNumClass: a-size-base
+    -   promoteClass: s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 AdHolder sg-col s-widget-spacing-small sg-col-12-of-16
+        normalClass: s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 sg-col s-widget-spacing-small sg-col-12-of-16
+#        productNameClass: a-size-medium
+        productNameClass: a-text-normal
+        productUrlClass: a-link-normal
+        productPriceClass: a-price
+        productAsinClass: data-asin
+        productPhotoClass: s-image
+        productStarArowClass: a-size-small
+        productStarArowAttributeClass: aria-label
+        productReviewNumClass: a-size-base

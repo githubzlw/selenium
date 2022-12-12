@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhz.selenium.mapper.RuleConfigAdvertisingMapper">
+
+
+    <select id="selectKeyWordAndNoOrder" resultType="java.util.HashMap">
+        select a.Campaign_Name,a.Ad_Group_Name,a.Customer_Search_Term,a.sl,a.campaign_id,a.ad_group_id,count(b.id) tsl,sum(b.Day7_TotalOrders) torders ,c.Advertised_ASIN,SUBSTRING(d.`item-name`,1,30 ) item_name ,a.Clicks,a.date
+        from
+        (select a.Campaign_Name,a.Ad_Group_Name,a.Customer_Search_Term,count(a.Customer_Search_Term) sl,a.campaign_id,a.ad_group_id,sum(a.Clicks) Clicks,b.date
+        from searchterm a
+        left join
+        (select Campaign_Name,Ad_Group_Name,Customer_Search_Term ,max(date) date,campaign_id,ad_group_id
+        from searchterm
+        where Day7_TotalOrders>0
+        group by campaign_id,ad_group_id,Customer_Search_Term ) b
+        on a.campaign_id=b.campaign_id and a.ad_group_id=b.ad_group_id and a.Customer_Search_Term=b.Customer_Search_Term and a.date>b.date
+        where  a.Day7_TotalOrders &lt; 1   and DATE_FORMAT(b.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by campaign_id,ad_group_id,a.Customer_Search_Term
+        HAVING Clicks>${click}) a
+        left join searchterm b
+        on a.campaign_id=b.campaign_id and a.ad_group_id=b.ad_group_id and a.Customer_Search_Term=b.Customer_Search_Term
+        left join amzasin c
+        on b.campaign_id=c.campaign_id and b.ad_group_id = c.ad_group_id
+        left join product2 d
+        on c.Advertised_ASIN = d.asin1
+        inner join campaign e
+        on c.campaign_id = e.campaign_id
+        inner join ad_group f
+        on b.ad_group_id = f.adGroup_id and f.state='enabled'
+        left join negative_keyword g
+        on a.Customer_Search_Term = g.keyword_text
+        where g.id is null
+        group by a.campaign_id,a.ad_group_id,a.Customer_Search_Term,a.sl;
+    </select>
+
+
+    <select id="selectImpressionAndCtrAndNoOrder" resultType="java.util.Map">
+        select a.Campaign_Name,a.Ad_Group_Name,a.Customer_Search_Term ,a.campaign_id,a.ad_group_id, a.sumimp,a.sumclicks,Round(a.SCTR,2) SCTR,a.sorders,SUBSTRING(c.`item-name`,1,30) item_name from (
+        select Campaign_Name,Ad_Group_Name,Customer_Search_Term , sum(Impressions) sumimp,sum(clicks) sumclicks,(sum(clicks) / sum(Impressions)) SCTR,sum(Day7_TotalOrders)  sorders,campaign_id,ad_group_id
+        from   searchterm
+        where  DATEDIFF(#{date},date) &lt; 3
+        group by campaign_id,ad_group_id,Customer_Search_Term
+        having sumimp>=${impression} and sorders &lt; 1 and SCTR &lt;= ${ctr} ) a left join amzasin b
+        on a.campaign_id= b.campaign_id and a.ad_group_id=b.ad_group_id
+        left join product2 c
+        on b.Advertised_ASIN = c.asin1
+        inner join campaign e
+	    on b.campaign_id = e.campaign_id
+		inner join ad_group f
+		on b.ad_group_id = f.adGroup_id and f.state='enabled'
+		left join negative_keyword g
+		on a.Customer_Search_Term = g.keyword_text
+		where g.id is null
+        GROUP BY a.campaign_id,a.ad_group_id
+    </select>
+
+
+    <select id="selectClickAndCtrAndNoOrder" resultType="java.util.Map">
+        select    a.Campaign_Name,a.Ad_Group_Name,a.Customer_Search_Term,a.campaign_id,a.ad_group_id,a.sl,Round(a.ctr,2) ctr ,count(b.id) tsl,sum(b.Day7_TotalOrders) torders ,SUBSTRING(d.`item-name`,1,30) item_name
+        from  (select  Campaign_Name,Ad_Group_Name,Customer_Search_Term,count(*) sl,ctr,campaign_id,ad_group_id
+				from  searchterm
+        where  Day7_TotalOrders &lt; 1 and Clicks> ${click}  and ctr &lt; ${ctr} and DATE_FORMAT(date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by campaign_id,ad_group_id,Customer_Search_Term ) a  left join    searchterm b
+        on a.campaign_id=b.campaign_id and a.ad_group_id=b.ad_group_id and a.Customer_Search_Term=b.Customer_Search_Term
+        left join amzasin c
+        on b.campaign_id = c.campaign_id and b.ad_group_id = c.ad_group_id
+        left join product2 d
+        on c.Advertised_ASIN = d.asin1
+        inner join campaign e
+		on b.campaign_id = e.campaign_id
+		inner join ad_group f
+		on b.ad_group_id = f.adGroup_id and f.state='enabled'
+		left join negative_keyword g
+		on a.Customer_Search_Term = g.keyword_text
+		where g.id is null
+        group by  a.campaign_id,a.ad_group_id,a.Customer_Search_Term,a.sl;
+    </select>
+
+    <select id="selectSearchTermByAcos" resultType="java.util.Map">
+       select a.Campaign_Name,a.Ad_Group_Name,a.Customer_Search_Term ,Round(a.tacos,2) tacos ,SUBSTRING(c.`item-name`,1,30) item_name from (
+				select st.Campaign_Name,st.Ad_Group_Name,st.Customer_Search_Term,st.tacos,st.campaign_id,st.ad_group_id from searchterm st,(
+        select
+        *,
+        max(date)as time
+        from searchterm where tacos>${acos}
+        GROUP BY Customer_Search_Term
+        )a
+        where st.Customer_Search_Term=a.Customer_Search_Term and st.date=a.time and st.tacos>${acos} and DATE_FORMAT(a.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}) a
+        left join amzasin b
+        on a.campaign_id= b.campaign_id and a.ad_group_id=b.ad_group_id
+        left join product2 c
+        on b.Advertised_ASIN = c.asin1
+        inner join campaign e
+		on b.campaign_id = e.campaign_id
+		inner join ad_group f
+		on b.ad_group_id = f.adGroup_id and f.state='enabled'
+		left join negative_keyword g
+		on a.Customer_Search_Term = g.keyword_text
+		where g.id is null
+		GROUP BY a.Customer_Search_Term
+        order by  a.tacos desc;
+    </select>
+
+    <select id="selectSearchTermByCtrAndClick" resultType="java.util.Map">
+        select a.Campaign_Name,a.Ad_Group_Name,a.Customer_Search_Term ,Round(a.ctr,2) ctr ,Round((a.Day7_TotalOrders/a.Clicks),2) conversionRate,Round(a.clicks,2) clicks,SUBSTRING(c.`item-name`,1,30) item_name from (
+        select st.*  from searchterm st,(
+        select
+        *,
+        max(date)as time
+        from searchterm where ctr >${ctr} and  clicks>${click}  and (Day7_TotalOrders/Clicks) &lt; ${conversionRate}
+        GROUP BY Customer_Search_Term
+        )a
+        where st.Customer_Search_Term=a.Customer_Search_Term and st.date=a.time and st.ctr >${ctr} and  st.clicks>${click}  and (st.Day7_TotalOrders/st.Clicks) &lt; ${conversionRate} and DATE_FORMAT(a.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}) a
+        left join amzasin b
+        on a.campaign_id= b.campaign_id and a.ad_group_id=b.ad_group_id
+        left join product2 c
+        on b.Advertised_ASIN = c.asin1
+        inner join campaign e
+		on b.campaign_id = e.campaign_id
+		inner join ad_group f
+		on b.ad_group_id = f.adGroup_id and f.state='enabled'
+		left join negative_keyword g
+		on a.Customer_Search_Term = g.keyword_text
+		where g.id is null
+        GROUP BY a.Customer_Search_Term
+    </select>
+
+    <select id="selectSearchTermByClickAndConrate" resultType="java.util.Map">
+        select    a.Campaign_Name,a.Ad_Group_Name,a.Customer_Search_Term,a.sl,a.sorders,count(b.id) tsl,sum(b.Day7_TotalOrders) torders,Round(a.conversionRate,2) conversionRate,SUBSTRING(d.`item-name`,1,30) item_name
+        from  (select  Campaign_Name,Ad_Group_Name,Customer_Search_Term,count(*) sl ,sum(Day7_TotalOrders) sorders,(Day7_TotalOrders/Clicks) as conversionRate,campaign_id,ad_group_id
+        from  searchterm where clicks>${click}  and (Day7_TotalOrders/Clicks) &lt; ${conversionRate} and DATE_FORMAT(date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by campaign_id,ad_group_id,Customer_Search_Term ) a  left join    searchterm b
+        on a.campaign_id=b.campaign_id and a.ad_group_id=b.ad_group_id and a.Customer_Search_Term=b.Customer_Search_Term
+        left join amzasin c
+        on b.campaign_id = c.campaign_id and b.ad_group_id = c.ad_group_id
+        left join product2 d
+        on c.Advertised_ASIN = d.asin1
+        inner join campaign e
+		on b.campaign_id = e.campaign_id
+		inner join ad_group f
+		on b.ad_group_id = f.adGroup_id and f.state='enabled'
+		left join negative_keyword g
+		on a.Customer_Search_Term = g.keyword_text
+		where g.id is null
+        group by  a.campaign_id,a.ad_group_id,a.Customer_Search_Term,a.sl,a.sorders;
+    </select>
+
+
+    <select id="selectAsinByClick" resultType="java.util.Map">
+        select a.* from (
+        select a.Advertised_SKU,a.Advertised_ASIN,sum(a.clicks) sclicks,sum(a.Day7_TotalOrders) sorders, SUBSTRING(p.`item-name`,1,30)  as item_name,a.Campaign_Name,a.Ad_Group_Name,a.campaign_id,a.ad_group_id from amzasin a, product2 p
+        where a.Advertised_ASIN = p.asin1 and DATE_FORMAT(End_Date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by a.Advertised_SKU,a.Advertised_ASIN having sorders &lt; 1 and sclicks> ${click} ) a
+        inner join campaign e
+        on a.campaign_id = e.campaign_id
+        inner join ad_group f
+        on a.ad_group_id = f.adGroup_id and f.state='enabled'
+        group by a.Advertised_SKU,a.Advertised_ASIN;
+    </select>
+
+    <select id="selectStopAdvice1" resultType="java.util.Map">
+       select * from (
+        select a.*,Round((a.spend/a.Day7_Total_Sales )*100,2)  acos, SUBSTRING(b.`item-name`,1,30) item_name
+        from  (select Advertised_SKU,Advertised_ASIN,sum(Impressions) Impressions,sum(Clicks) clicks ,sum(Day7_AdvertisedSKUSales) Day7_AdvertisedSKUSales,sum(Day7_AdvertisedSKU_Units) Day7_AdvertisedSKU_Units
+        ,sum(spend) spend, sum(Day7_Total_Sales)  Day7_Total_Sales,Campaign_Name,Ad_Group_Name,campaign_id,ad_group_id from amzasin
+        group by  Advertised_SKU,Advertised_ASIN) a
+        left join product2 b
+        on a.Advertised_ASIN = b.asin1
+        where  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units &lt;= 10 and (a.spend/a.Day7_Total_Sales )>=${percent}
+        GROUP BY a.Advertised_SKU,a.Advertised_ASIN	) t
+        inner join campaign e
+        on t.campaign_id = e.campaign_id
+        inner join ad_group f
+        on t.ad_group_id = f.adGroup_id and f.state='enabled'
+    </select>
+
+    <select id="selectStopAdvice2" resultType="java.util.Map">
+        select * from (
+        select a.*,Round((a.spend/a.Day7_Total_Sales )*100,2)  acos, SUBSTRING(b.`item-name`,1,30) item_name
+        from  (select Advertised_SKU,Advertised_ASIN,sum(Impressions) Impressions,sum(Clicks) clicks ,sum(Day7_AdvertisedSKUSales) Day7_AdvertisedSKUSales,sum(Day7_AdvertisedSKU_Units) Day7_AdvertisedSKU_Units
+        ,sum(spend) spend, sum(Day7_Total_Sales)  Day7_Total_Sales,Campaign_Name,Ad_Group_Name,campaign_id,ad_group_id from amzasin
+        group by  Advertised_SKU,Advertised_ASIN) a
+        left join product2 b
+        on a.Advertised_ASIN = b.asin1
+        where  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units>10  and  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units &lt;=20 and (a.spend/a.Day7_Total_Sales )>=${percent}
+        GROUP BY a.Advertised_SKU,a.Advertised_ASIN	) t
+        inner join campaign e
+        on t.campaign_id = e.campaign_id
+        inner join ad_group f
+        on t.ad_group_id = f.adGroup_id and f.state='enabled'
+    </select>
+
+    <select id="selectStopAdvice3" resultType="java.util.Map">
+        select * from (
+        select a.*,Round((a.spend/a.Day7_Total_Sales )*100,2)  acos, SUBSTRING(b.`item-name`,1,30) item_name
+        from  (select Advertised_SKU,Advertised_ASIN,sum(Impressions) Impressions,sum(Clicks) clicks ,sum(Day7_AdvertisedSKUSales) Day7_AdvertisedSKUSales,sum(Day7_AdvertisedSKU_Units) Day7_AdvertisedSKU_Units
+        ,sum(spend) spend, sum(Day7_Total_Sales)  Day7_Total_Sales,Campaign_Name,Ad_Group_Name,campaign_id,ad_group_id from amzasin
+        group by  Advertised_SKU,Advertised_ASIN) a
+        left join product2 b
+        on a.Advertised_ASIN = b.asin1
+        where  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units>20  and  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units &lt;=30 and (a.spend/a.Day7_Total_Sales )>=${percent}
+        GROUP BY a.Advertised_SKU,a.Advertised_ASIN	) t
+        inner join campaign e
+        on t.campaign_id = e.campaign_id
+        inner join ad_group f
+        on t.ad_group_id = f.adGroup_id and f.state='enabled'
+    </select>
+
+    <select id="selectStopAdvice4" resultType="java.util.Map">
+        select * from (
+        select a.*,Round((a.spend/a.Day7_Total_Sales )*100,2)  acos, SUBSTRING(b.`item-name`,1,30) item_name
+        from  (select Advertised_SKU,Advertised_ASIN,sum(Impressions) Impressions,sum(Clicks) clicks ,sum(Day7_AdvertisedSKUSales) Day7_AdvertisedSKUSales,sum(Day7_AdvertisedSKU_Units) Day7_AdvertisedSKU_Units
+        ,sum(spend) spend, sum(Day7_Total_Sales)  Day7_Total_Sales,Campaign_Name,Ad_Group_Name,campaign_id,ad_group_id from amzasin
+        group by  Advertised_SKU,Advertised_ASIN) a
+        left join product2 b
+        on a.Advertised_ASIN = b.asin1
+        where  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units>30  and  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units &lt;=40 and (a.spend/a.Day7_Total_Sales )>=${percent}
+        GROUP BY a.Advertised_SKU,a.Advertised_ASIN	) t
+        inner join campaign e
+        on t.campaign_id = e.campaign_id
+        inner join ad_group f
+        on t.ad_group_id = f.adGroup_id and f.state='enabled'
+    </select>
+
+    <select id="selectStopAdvice5" resultType="java.util.Map">
+        select * from (
+        select a.*,Round((a.spend/a.Day7_Total_Sales )*100,2)  acos, SUBSTRING(b.`item-name`,1,30) item_name
+        from  (select Advertised_SKU,Advertised_ASIN,sum(Impressions) Impressions,sum(Clicks) clicks ,sum(Day7_AdvertisedSKUSales) Day7_AdvertisedSKUSales,sum(Day7_AdvertisedSKU_Units) Day7_AdvertisedSKU_Units
+        ,sum(spend) spend, sum(Day7_Total_Sales)  Day7_Total_Sales,Campaign_Name,Ad_Group_Name,campaign_id,ad_group_id from amzasin
+        group by  Advertised_SKU,Advertised_ASIN) a
+        left join product2 b
+        on a.Advertised_ASIN = b.asin1
+        where  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units>40  and  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units &lt;=50 and (a.spend/a.Day7_Total_Sales )>=${percent}
+        GROUP BY a.Advertised_SKU,a.Advertised_ASIN	) t
+        inner join campaign e
+        on t.campaign_id = e.campaign_id
+        inner join ad_group f
+        on t.ad_group_id = f.adGroup_id and f.state='enabled'
+    </select>
+
+    <select id="selectStopAdvice6" resultType="java.util.Map">
+        select * from (
+        select a.*,Round((a.spend/a.Day7_Total_Sales )*100,2)  acos, SUBSTRING(b.`item-name`,1,30) item_name
+        from  (select Advertised_SKU,Advertised_ASIN,sum(Impressions) Impressions,sum(Clicks) clicks ,sum(Day7_AdvertisedSKUSales) Day7_AdvertisedSKUSales,sum(Day7_AdvertisedSKU_Units) Day7_AdvertisedSKU_Units
+        ,sum(spend) spend, sum(Day7_Total_Sales)  Day7_Total_Sales,Campaign_Name,Ad_Group_Name,campaign_id,ad_group_id from amzasin
+        group by  Advertised_SKU,Advertised_ASIN) a
+        left join product2 b
+        on a.Advertised_ASIN = b.asin1
+        where  a.Day7_AdvertisedSKUSales/a.Day7_AdvertisedSKU_Units>50  and (a.spend/a.Day7_Total_Sales )>=${percent}
+        GROUP BY a.Advertised_SKU,a.Advertised_ASIN	) t
+        inner join campaign e
+        on t.campaign_id = e.campaign_id
+        inner join ad_group f
+        on t.ad_group_id = f.adGroup_id and f.state='enabled'
+    </select>
+
+
+    <select id="selectSearchTermByLowAcos" resultType="java.util.Map">
+        SELECT Round((sum(s.spend)/sum(s.Day7_TotalSales) )*100,2) acos,s.Customer_Search_Term,s.Campaign_Name,s.Ad_Group_Name
+        FROM searchterm s ,ad_group f
+        where s.campaign_id = f.campaign_id and s.ad_group_id = f.adGroup_id and f.state = 'paused' and DATE_FORMAT(s.date, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by s.Customer_Search_Term,s.campaign_id,s.ad_group_id having acos&lt;${acos}
+    </select>
+
+
+</mapper>
+
+
