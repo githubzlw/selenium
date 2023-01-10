@@ -144,9 +144,31 @@
         </dependency>
 
         <dependency>
+            <groupId>com.amazon.spapi</groupId>
+            <artifactId>spapi-java</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/lib/spapi-java.jar</systemPath>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>iocatalog.swagger</groupId>-->
+<!--            <artifactId>swagger-java-client</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/src/main/resources/lib/catalogItems_2022-04-01.jar</systemPath>-->
+<!--        </dependency>-->
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
