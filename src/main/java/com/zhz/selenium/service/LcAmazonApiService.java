@@ -14,4 +14,6 @@ public interface LcAmazonApiService {
     List<ApiResult> selectKeywordsAsin (Integer dateRange,String asin) ;
 
     List<ApiResult> selectRankAsin(String asin);
+
+    ApiResult listingDetail(String asin) ;
 }

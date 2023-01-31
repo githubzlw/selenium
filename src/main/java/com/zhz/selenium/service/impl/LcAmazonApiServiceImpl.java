@@ -38,6 +38,17 @@ public class LcAmazonApiServiceImpl implements LcAmazonApiService {
             return null;
         }
     }
+    @Override
+    public ApiResult listingDetail(String asin) {
+        try {
+            ApiResult bean = lcAmazonApiMapper.listingDetail(asin);
+            return bean;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
 
     @Override
     public List<ApiResult> selectKeywordsAsin(Integer dateRange,String asin) {

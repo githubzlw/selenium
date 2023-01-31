@@ -16,4 +16,7 @@ public interface LcAmazonApiMapper {
     List<ApiResult> selectKeywordsAsin(@Param("dateRange")Integer dateRange,@Param("asin")String asin);
 
     List<ApiResult>  selectRankAsin(@Param("asin")String asin);
+
+    ApiResult  listingDetail(@Param("asin")String asin);
+
 }
