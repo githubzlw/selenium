@@ -46,7 +46,7 @@ public class ExcelUtil {
         response.setContentType("multipart/form-data");
         response.setCharacterEncoding("UTF-8");
         //文件名字
-        String fileName = asin+"_"+date+".xlsx";
+        String fileName = asin+"-"+date+".xlsx";
         response.setHeader("Content-disposition", "attachment;filename=" +fileName);
         //文件模板输入流
         InputStream inputStream = new ClassPathResource("templates/demo.xlsx").getInputStream();

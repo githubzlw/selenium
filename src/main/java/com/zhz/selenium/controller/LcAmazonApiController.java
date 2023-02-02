@@ -184,6 +184,8 @@ public class LcAmazonApiController {
     public void excelExport(HttpServletResponse response,@RequestParam(value="daterange") Integer daterange,@RequestParam(value="asin") String asin) throws IOException {
 
 
+        // daterange 加两天，因为美国时间数据还有抓到
+        daterange = daterange+2;
         //产品标题,主图
         ApiResult resBean = lcAmazonApiService.listingDetail(asin);
 
