@@ -13,14 +13,14 @@ public class ApiResult {
     private String zrPm;
     // 广告排名中间结果
     private String ggPm;
-    //Session数(自然流量 sp api)
-    private Integer asinSession;
+//    //Session数(自然流量 sp api)
+//    private Integer asinSession;
     //总订单数(sp api)
     private Integer unitOrder;
     //总广告点击数 (该ASIN所在Campaign的)
     private Integer clicks;
-    //广告花费
-    private String spend;
+//    //广告花费
+//    private String spend;
     //广告订单数
     private Integer day7TotalOrders;
     //搜索词
@@ -39,5 +39,4 @@ public class ApiResult {
         this.zrPm=zrPm;
         this.ggPm=ggPm;
     }
-
 }

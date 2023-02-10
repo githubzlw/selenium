@@ -8,10 +8,8 @@
         <result column="amz_asin" property="amzAsin" />
         <result column="amz_product_normal_count" property="normalCount" />
         <result column="amz_product_not_normal_count" property="notNormalCount" />
-        <result column="asin_session" property="asinSession" />
         <result column="unit_order" property="unitOrder" />
         <result column="clicks" property="clicks" />
-        <result column="spend" property="spend" />
         <result column="day7_totalOrders" property="day7TotalOrders" />
         <result column="Customer_Search_Term" property="customerSearchTerm" />
         <result column="cpc" property="cpc" />
@@ -19,6 +17,20 @@
         <result column="title" property="title" />
         <result column="img" property="img" />
     </resultMap>
+
+    <resultMap id="AmazonChildResult" type="com.zhz.selenium.pojo.ApiChildResult">
+        <result column="child_asin" property="childAsin" />
+        <result column="child_asin_session" property="childAsinSession" />
+        <result column="child_unit_order" property="childUnitOrder" />
+        <result column="child_clicks" property="childClicks" />
+        <result column="child_spend" property="childSpend" />
+        <result column="child_day7_totalOrders" property="childDay7TotalOrders" />
+        <result column="child_impressions" property="childImpressions" />
+        <result column="child_Day7_OtherSKU_Units" property="childDay7OtherSKUUnits" />
+        <result column="child_Day7_AdvertisedSKU_Units" property="childDay7AdvertisedSKUUnits" />
+        <result column="child_Day7_TotalUnits" property="childDay7TotalUnits" />
+    </resultMap>
+
 
     <select id="selectRankSearchterm" resultMap="AmazonResult">
         select product_asin as amz_asin,IFNULL(amz_product_normal_count,0) as amz_product_normal_count,
@@ -28,27 +40,27 @@
     </select>
 
 
-    <select id="selectSalesAsin" resultMap="AmazonResult">
-        select max(c.asin_session) asin_session ,max(c.unit_order) unit_order,sum(a.Clicks) clicks,sum(a.Spend) spend,
-            sum(a.Day1_TotalOrders) Day7_TotalOrders
+    <select id="selectSalesAsin" resultMap="AmazonChildResult">
+        select IFNULL(max(c.asin_session ),0) child_asin_session ,IFNULL(max(c.unit_order),0) child_unit_order,sum(a.Clicks) child_clicks,sum(a.Spend) child_spend,
+                sum(a.Day7_TotalOrders) child_day7_totalOrders,
+                max(b.Advertised_ASIN) as child_asin,sum(a.Impressions) as child_impressions,sum(Day7_OtherSKU_Units) as child_Day7_OtherSKU_Units,
+                sum(Day7_AdvertisedSKU_Units) as child_Day7_AdvertisedSKU_Units,sum(Day7_TotalUnits) as child_Day7_TotalUnits
         from searchterm a
         inner JOIN  (select distinct campaign_id,Advertised_ASIN from  amzasin) b on a.campaign_id=b.campaign_id
-        inner join
+        left join
         (select sum(asin_session) asin_session,child_asin,sum(unit_order) unit_order from  sp_api_report   where  child_asin=#{asin} and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(create_date)) C on b.Advertised_ASIN=c.child_asin
         where
         b.Advertised_ASIN=#{asin}
         and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(a.date)
         GROUP BY b.Advertised_ASIN
-
     </select>
 
     <select id="selectKeywordsAsin" resultMap="AmazonResult">
-
         select a.Customer_Search_Term,sum(a.Clicks) as clicks,round(sum(a.Spend)/sum(a.Clicks),2) cpc,max(c.unit_order) unit_order,sum(a.Day1_TotalOrders) Day7_TotalOrders,
         sum(a.impressions) as impressions
         from searchterm a
         inner JOIN  (select distinct campaign_id,Advertised_ASIN from  amzasin) b on a.campaign_id=b.campaign_id
-        inner join
+        left join
         (select child_asin,sum(unit_order) unit_order from  sp_api_report   where  child_asin=#{asin} and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(create_date)) c
         on b.Advertised_ASIN=c.child_asin
         where
@@ -82,6 +94,13 @@
 
     <select id="listingDetail" resultMap="AmazonResult">
         select asin as amz_asin,title,img from asin_list_detail where asin=#{asin}
+    </select>
+
+    <select id="selectChildAsin" resultMap="AmazonChildResult">
+        select child_asin from sp_api_report
+        where  parent_asin = (select  parent_asin from sp_api_report where child_asin=#{childAsin} order by create_date desc limit 1)
+        and child_asin !=#{childAsin}
+        GROUP BY child_asin
     </select>
 
 </mapper>

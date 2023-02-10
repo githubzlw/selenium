@@ -1,12 +1,12 @@
 package com.zhz.selenium.controller;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.amazon.SellingPartnerAPIAA.AWSAuthenticationCredentials;
 import com.amazon.SellingPartnerAPIAA.AWSAuthenticationCredentialsProvider;
 import com.amazon.SellingPartnerAPIAA.LWAAuthorizationCredentials;
 import com.amazon.spapi.catalogItemsV0.ApiException;
 import com.amazon.spapi.catalogItemsV0.api.CatalogApi;
 import com.amazon.spapi.catalogItemsV0.model.GetCatalogItemResponse;
+import com.zhz.selenium.pojo.ApiChildResult;
 import com.zhz.selenium.pojo.ApiResult;
 import com.zhz.selenium.service.LcAmazonApiService;
 import com.zhz.selenium.util.ExcelUtil;
@@ -14,12 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -94,25 +96,25 @@ public class LcAmazonApiController {
         return strTitle+strList;
     }
 
-    @RequestMapping(value = "/sales", method = RequestMethod.GET)
-    @ResponseBody
-    public String sales(@RequestParam(value="daterange") Integer daterange,@RequestParam(value="asin") String asin){
-
-        //返回这段时间的 Session数(自然流量 sp api), 总订单数(sp api)，总广告点击数 (该ASIN所在Campaign的) ，广告花费 和 广告订单数 。   用 ；做分割符
-        ApiResult bean = lcAmazonApiService.selectSalesAsin(daterange, asin);
-
-        String strList ="";
-        if(bean!=null){
-            strList +=bean.getAsinSession() + ","+bean.getUnitOrder()+","+bean.getClicks()+","+bean.getSpend()+","+bean.getDay7TotalOrders();
-        }else{
-            strList +=0 + ","+0+","+0+","+0+","+0;
-        }
-
-
-        String strTitle ="Session数(自然流量 sp api),总订单数(sp api),总广告点击数(该ASIN所在Campaign的),广告花费,广告订单数</br>";
-
-        return strTitle+strList;
-    }
+//    @RequestMapping(value = "/sales", method = RequestMethod.GET)
+//    @ResponseBody
+//    public String sales(@RequestParam(value="daterange") Integer daterange,@RequestParam(value="asin") String asin){
+//
+//        //返回这段时间的 Session数(自然流量 sp api), 总订单数(sp api)，总广告点击数 (该ASIN所在Campaign的) ，广告花费 和 广告订单数 。   用 ；做分割符
+//        ApiResult bean = lcAmazonApiService.selectSalesAsin(daterange, asin);
+//
+//        String strList ="";
+//        if(bean!=null){
+//            strList +=bean.getAsinSession() + ","+bean.getUnitOrder()+","+bean.getClicks()+","+bean.getSpend()+","+bean.getDay7TotalOrders();
+//        }else{
+//            strList +=0 + ","+0+","+0+","+0+","+0;
+//        }
+//
+//
+//        String strTitle ="Session数(自然流量 sp api),总订单数(sp api),总广告点击数(该ASIN所在Campaign的),广告花费,广告订单数</br>";
+//
+//        return strTitle+strList;
+//    }
 
     @RequestMapping(value = "/keywords", method = RequestMethod.GET)
     @ResponseBody
@@ -183,25 +185,62 @@ public class LcAmazonApiController {
     @ResponseBody
     public void excelExport(HttpServletResponse response,@RequestParam(value="daterange") Integer daterange,@RequestParam(value="asin") String asin) throws IOException {
 
-
         // daterange 加两天，因为美国时间数据还有抓到
         daterange = daterange+2;
         //产品标题,主图
         ApiResult resBean = lcAmazonApiService.listingDetail(asin);
 
-        //返回这段时间的 Session数(自然流量 sp api), 总订单数(sp api)，总广告点击数 (该ASIN所在Campaign的) ，广告花费 和 广告订单数 。   用 ；做分割符
-        ApiResult bean = lcAmazonApiService.selectSalesAsin(daterange, asin);
 
-        if(resBean!=null && bean!=null){
-            bean.setTitle(resBean.getTitle());
-            bean.setImg(resBean.getImg());
+        // 根据子asin，查询父asin，并且该所有子asin数据
+        List<ApiChildResult> childList = lcAmazonApiService.selectChildAsin(asin);
+        List<ApiChildResult> childBeanList = new ArrayList<>();
+
+        // 传值进来的asin数据处理 start
+        ApiChildResult beanP = new ApiChildResult();
+        beanP = lcAmazonApiService.selectSalesAsin(daterange, asin);
+        if(beanP == null){
+            ApiChildResult beanN = new ApiChildResult();
+            beanN.setChildAsin(asin);
+            beanN.setChildAsinSession(0);
+            beanN.setChildClicks(0);
+            beanN.setChildDay7AdvertisedSKUUnits(0);
+            beanN.setChildDay7OtherSKUUnits(0);
+            beanN.setChildDay7TotalOrders(0);
+            beanN.setChildImpressions(0);
+            beanN.setChildSpend("0");
+            beanN.setChildUnitOrder(0);
+            beanN.setChildDay7TotalUnits(0);
+            childBeanList.add(beanN);
+        }
+        childBeanList.add(beanP);
+        // 传值进来的asin数据处理 end
+
+        if(!CollectionUtils.isEmpty(childList)){
+            for(ApiChildResult bean : childList){
+                ApiChildResult beanNew = new ApiChildResult();
+                        //返回这段时间的 Session数(自然流量 sp api), 总订单数(sp api)，总广告点击数 (该ASIN所在Campaign的) ，广告花费 和 广告订单数 等
+                beanNew = lcAmazonApiService.selectSalesAsin(daterange, bean.getChildAsin());
+                if(beanNew == null){
+                    ApiChildResult beanN = new ApiChildResult();
+                    beanN.setChildAsin(bean.getChildAsin());
+                    beanN.setChildAsinSession(0);
+                    beanN.setChildClicks(0);
+                    beanN.setChildDay7AdvertisedSKUUnits(0);
+                    beanN.setChildDay7OtherSKUUnits(0);
+                    beanN.setChildDay7TotalOrders(0);
+                    beanN.setChildImpressions(0);
+                    beanN.setChildSpend("0");
+                    beanN.setChildUnitOrder(0);
+                    beanN.setChildDay7TotalUnits(0);
+                    childBeanList.add(beanN);
+                }
+                childBeanList.add(beanNew);
+            }
+
         }
 
         //返回这段时间的,该ASIN所在Campaign的, 的前20名 search term （最多20个,按点击数排序）,返回数据格式
         List<ApiResult> list = lcAmazonApiService.selectKeywordsAsin(daterange, asin);
-//        response.setContentType("application/vnd.ms-excel");
-//        response.setHeader("Content-Disposition","attachment; filename=" + "test.xlsx");
-//        ExcelUtil.writeExcel(response,list);
 
         if(!CollectionUtils.isEmpty(list)){
 
@@ -237,9 +276,10 @@ public class LcAmazonApiController {
         }
 
         //excel处理
-        ExcelUtil.fillExcel(response,list,bean,daterange,asin);
+        ExcelUtil.fillExcel(response,list,resBean,daterange,asin,childBeanList);
 
     }
+
 
     public CatalogApi api(){
         AWSAuthenticationCredentials awsAuthenticationCredentials = AWSAuthenticationCredentials.builder()
