@@ -7,6 +7,7 @@ import com.alibaba.excel.metadata.data.WriteCellData;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.fill.FillConfig;
 import com.zhz.selenium.pojo.ApiChildResult;
+import com.zhz.selenium.pojo.ApiOther;
 import com.zhz.selenium.pojo.ApiResult;
 import org.springframework.core.io.ClassPathResource;
 
@@ -49,7 +50,7 @@ public class ExcelUtil {
      * @throws IOException
      */
     public static void fillExcel(HttpServletResponse response,List<ApiResult> list,ApiResult apiResult,Integer date,
-                                 String asin,List<ApiChildResult> childList) throws IOException {
+                                 String asin,List<ApiChildResult> childList,List<ApiOther> otLists ) throws IOException {
         ServletOutputStream out = response.getOutputStream();
         response.setContentType("multipart/form-data");
         response.setCharacterEncoding("UTF-8");
@@ -77,6 +78,8 @@ public class ExcelUtil {
         writer.fill(list,fillConfig,sheet);
         //填充数据多条
         writer.fill(childList,fillConfig,sheet);
+        //填充数据多条
+        writer.fill(otLists,fillConfig,sheet);
         //填充完成
         writer.finish();
         out.flush();

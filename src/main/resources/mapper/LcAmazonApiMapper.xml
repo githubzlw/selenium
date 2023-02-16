@@ -16,6 +16,8 @@
         <result column="impressions" property="impressions" />
         <result column="title" property="title" />
         <result column="img" property="img" />
+        <result column="start_date" property="startDate" />
+
     </resultMap>
 
     <resultMap id="AmazonChildResult" type="com.zhz.selenium.pojo.ApiChildResult">
@@ -29,6 +31,11 @@
         <result column="child_Day7_OtherSKU_Units" property="childDay7OtherSKUUnits" />
         <result column="child_Day7_AdvertisedSKU_Units" property="childDay7AdvertisedSKUUnits" />
         <result column="child_Day7_TotalUnits" property="childDay7TotalUnits" />
+    </resultMap>
+
+    <resultMap id="AmazonOther" type="com.zhz.selenium.pojo.ApiOther">
+        <result column="campaign_name" property="campaignName" />
+        <result column="keyword_target" property="keywordTarget" />
     </resultMap>
 
 
@@ -55,8 +62,16 @@
         GROUP BY b.Advertised_ASIN
     </select>
 
+    <select id="selectSellAsin" resultMap="AmazonChildResult">
+        select IFNULL(sum(a.Day7_TotalOrders) ,0) child_day7_totalOrders,IFNULL(sum(a.Day7_OtherSKU_Units),0) as child_Day7_OtherSKU_Units,
+        IFNULL(sum(a.Day7_AdvertisedSKU_Units),0) as child_Day7_AdvertisedSKU_Units,IFNULL(sum(a.Day7_TotalUnits),0) as child_Day7_TotalUnits
+        from amzasin a
+        where a.Advertised_ASIN=#{asin}
+        and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(a.Start_Date)
+    </select>
+
     <select id="selectKeywordsAsin" resultMap="AmazonResult">
-        select a.Customer_Search_Term,sum(a.Clicks) as clicks,round(sum(a.Spend)/sum(a.Clicks),2) cpc,max(c.unit_order) unit_order,sum(a.Day1_TotalOrders) Day7_TotalOrders,
+        select a.Customer_Search_Term,sum(a.Clicks) as clicks,round(sum(a.Spend)/sum(a.Clicks),2) cpc,max(c.unit_order) unit_order,sum(a.Day7_TotalOrders) Day7_TotalOrders,
         sum(a.impressions) as impressions
         from searchterm a
         inner JOIN  (select distinct campaign_id,Advertised_ASIN from  amzasin) b on a.campaign_id=b.campaign_id
@@ -93,7 +108,7 @@
     </select>
 
     <select id="listingDetail" resultMap="AmazonResult">
-        select asin as amz_asin,title,img from asin_list_detail where asin=#{asin}
+        select asin as amz_asin,title,img,date_sub(curdate(), INTERVAL ${dateRange} DAY) as start_date from asin_list_detail where asin=#{asin}
     </select>
 
     <select id="selectChildAsin" resultMap="AmazonChildResult">
@@ -101,6 +116,23 @@
         where  parent_asin = (select  parent_asin from sp_api_report where child_asin=#{childAsin} order by create_date desc limit 1)
         and child_asin !=#{childAsin}
         GROUP BY child_asin
+    </select>
+
+    <select id="getNewDate" resultType="java.lang.String">
+	    select max(date) as new_date from searchterm
+    </select>
+
+    <select id="selectRankSearchtermByNewDate" resultType="java.lang.String">
+	    select DATE_FORMAT(max(search_date),'%Y-%m-%d') as new_date
+        from tab_product_location  where keyword=#{keyWord}
+    </select>
+
+
+    <select id="selectCampaignTarget" resultMap="AmazonOther">
+        select distinct Campaign_Name as campaign_name,targeting  as keyword_target from  searchterm
+        where
+        campaign_id in (select distinct campaign_id from  amzasin where Advertised_ASIN =#{asin} and date_sub(curdate(), INTERVAL ${dateRange} DAY)  &lt;=  date(Start_Date))
+        and date_sub(curdate(), INTERVAL ${dateRange} DAY) &lt;=  date(date)
     </select>
 
 </mapper>

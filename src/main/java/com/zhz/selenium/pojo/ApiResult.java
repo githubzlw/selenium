@@ -1,6 +1,5 @@
 package com.zhz.selenium.pojo;
 
-import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 
 @Data
@@ -33,6 +32,14 @@ public class ApiResult {
     private String title;
     //主图
     private String img;
+    //标题是否含Search Term
+    private String bhFlag;
+    //开始时间
+    private String startDate;
+    //结束时间
+    private String newDate;
+    //开始时间-结束时间
+    private String seDate;
 
     public ApiResult(String amzAsin, String zrPm, String ggPm) {
         this.amzAsin=amzAsin;

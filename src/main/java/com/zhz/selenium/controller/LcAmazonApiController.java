@@ -7,6 +7,7 @@ import com.amazon.spapi.catalogItemsV0.ApiException;
 import com.amazon.spapi.catalogItemsV0.api.CatalogApi;
 import com.amazon.spapi.catalogItemsV0.model.GetCatalogItemResponse;
 import com.zhz.selenium.pojo.ApiChildResult;
+import com.zhz.selenium.pojo.ApiOther;
 import com.zhz.selenium.pojo.ApiResult;
 import com.zhz.selenium.service.LcAmazonApiService;
 import com.zhz.selenium.util.ExcelUtil;
@@ -188,7 +189,15 @@ public class LcAmazonApiController {
         // daterange 加两天，因为美国时间数据还有抓到
         daterange = daterange+2;
         //产品标题,主图
-        ApiResult resBean = lcAmazonApiService.listingDetail(asin);
+        ApiResult resBean = lcAmazonApiService.listingDetail(daterange,asin);
+
+        // 查询searchterm表数据库最新更新日期
+        String newDate = lcAmazonApiService.getNewDate();
+
+        //开始日期-结束日期
+        resBean.setSeDate(resBean.getStartDate()+"/"+newDate);
+        //数据库中最新更新日期
+        resBean.setNewDate(newDate);
 
 
         // 根据子asin，查询父asin，并且该所有子asin数据
@@ -198,19 +207,14 @@ public class LcAmazonApiController {
         // 传值进来的asin数据处理 start
         ApiChildResult beanP = new ApiChildResult();
         beanP = lcAmazonApiService.selectSalesAsin(daterange, asin);
-        if(beanP == null){
-            ApiChildResult beanN = new ApiChildResult();
-            beanN.setChildAsin(asin);
-            beanN.setChildAsinSession(0);
-            beanN.setChildClicks(0);
-            beanN.setChildDay7AdvertisedSKUUnits(0);
-            beanN.setChildDay7OtherSKUUnits(0);
-            beanN.setChildDay7TotalOrders(0);
-            beanN.setChildImpressions(0);
-            beanN.setChildSpend("0");
-            beanN.setChildUnitOrder(0);
-            beanN.setChildDay7TotalUnits(0);
-            childBeanList.add(beanN);
+
+        // 订单数查询
+        ApiChildResult beanS = lcAmazonApiService.selectSellAsin(daterange, asin);
+        if(beanP != null){
+            beanP.setChildDay7TotalOrders(beanS.getChildDay7TotalOrders());
+            beanP.setChildDay7OtherSKUUnits(beanS.getChildDay7OtherSKUUnits());
+            beanP.setChildDay7AdvertisedSKUUnits(beanS.getChildDay7AdvertisedSKUUnits());
+            beanP.setChildDay7TotalUnits(beanS.getChildDay7TotalUnits());
         }
         childBeanList.add(beanP);
         // 传值进来的asin数据处理 end
@@ -220,20 +224,27 @@ public class LcAmazonApiController {
                 ApiChildResult beanNew = new ApiChildResult();
                         //返回这段时间的 Session数(自然流量 sp api), 总订单数(sp api)，总广告点击数 (该ASIN所在Campaign的) ，广告花费 和 广告订单数 等
                 beanNew = lcAmazonApiService.selectSalesAsin(daterange, bean.getChildAsin());
-                if(beanNew == null){
-                    ApiChildResult beanN = new ApiChildResult();
-                    beanN.setChildAsin(bean.getChildAsin());
-                    beanN.setChildAsinSession(0);
-                    beanN.setChildClicks(0);
-                    beanN.setChildDay7AdvertisedSKUUnits(0);
-                    beanN.setChildDay7OtherSKUUnits(0);
-                    beanN.setChildDay7TotalOrders(0);
-                    beanN.setChildImpressions(0);
-                    beanN.setChildSpend("0");
-                    beanN.setChildUnitOrder(0);
-                    beanN.setChildDay7TotalUnits(0);
-                    childBeanList.add(beanN);
+                ApiChildResult beanSe = lcAmazonApiService.selectSellAsin(daterange, bean.getChildAsin());
+                if(beanNew != null){
+                    beanNew.setChildDay7TotalOrders(beanSe.getChildDay7TotalOrders());
+                    beanNew.setChildDay7OtherSKUUnits(beanSe.getChildDay7OtherSKUUnits());
+                    beanNew.setChildDay7AdvertisedSKUUnits(beanSe.getChildDay7AdvertisedSKUUnits());
+                    beanNew.setChildDay7TotalUnits(beanSe.getChildDay7TotalUnits());
                 }
+//                if(beanNew == null){
+//                    ApiChildResult beanN = new ApiChildResult();
+//                    beanN.setChildAsin(bean.getChildAsin());
+//                    beanN.setChildAsinSession(0);
+//                    beanN.setChildClicks(0);
+//                    beanN.setChildDay7AdvertisedSKUUnits(0);
+//                    beanN.setChildDay7OtherSKUUnits(0);
+//                    beanN.setChildDay7TotalOrders(0);
+//                    beanN.setChildImpressions(0);
+//                    beanN.setChildSpend("0");
+//                    beanN.setChildUnitOrder(0);
+//                    beanN.setChildDay7TotalUnits(0);
+//                    childBeanList.add(beanN);
+//                }
                 childBeanList.add(beanNew);
             }
 
@@ -245,6 +256,19 @@ public class LcAmazonApiController {
         if(!CollectionUtils.isEmpty(list)){
 
             for(ApiResult obj : list){
+                //标题是否含Search Term
+                if(resBean!=null){
+                    //标题转换小写
+                    String  title = resBean.getTitle().toLowerCase();
+                    //search term转换小写
+                    String searchTerm = obj.getCustomerSearchTerm().toLowerCase();
+                    if(title.indexOf(searchTerm)>0){
+                        obj.setBhFlag("yes");
+                    }else{
+                        obj.setBhFlag("no");
+                    }
+                }
+
                 // 返回 ASIN, 自然排名 和  广告排名  ,用 ；做分割符
                 List<ApiResult> srLists = lcAmazonApiService.selectRankSearchterm(obj.getCustomerSearchTerm());
 
@@ -267,16 +291,41 @@ public class LcAmazonApiController {
                     obj.setZrPm(zrPms.toString().lastIndexOf(';')>0?zrPms.toString().substring(0,zrPms.toString().length()-1):zrPms.toString());
                     obj.setGgPm(ggPms.lastIndexOf(";")>0?ggPms.substring(0,ggPms.length()-1):ggPms);
                     obj.setAmzAsin(amzAsin.lastIndexOf(';')>0?amzAsin.substring(0,amzAsin.length()-1):amzAsin);
+                    //爬虫最后时间
+                    String psNewDate = lcAmazonApiService.selectRankSearchtermByNewDate(obj.getCustomerSearchTerm());
+                    obj.setNewDate(psNewDate);
                 }else{
                     obj.setZrPm("");
                     obj.setGgPm("");
                     obj.setAmzAsin("");
+                    obj.setNewDate("");
+                }
+
+
+            }
+        }
+
+
+        //campaignName,keywordTarget集合数据
+        List<ApiOther> otLists = new ArrayList<>();
+        //传进来的asin
+        List<ApiOther> pList = lcAmazonApiService.selectCampaignTarget(daterange,asin);
+        if(!CollectionUtils.isEmpty(pList)){
+            otLists.addAll(pList);
+        }
+        // campaignName,keywordTarget查询
+        if(!CollectionUtils.isEmpty(childList)) {
+            for (ApiChildResult bean : childList) {
+                //子asin
+                List<ApiOther> ctLists = lcAmazonApiService.selectCampaignTarget(daterange,bean.getChildAsin());
+                if(!CollectionUtils.isEmpty(ctLists)){
+                    otLists.addAll(ctLists);
                 }
             }
         }
 
         //excel处理
-        ExcelUtil.fillExcel(response,list,resBean,daterange,asin,childBeanList);
+        ExcelUtil.fillExcel(response,list,resBean,daterange-2,asin,childBeanList,otLists);
 
     }
 

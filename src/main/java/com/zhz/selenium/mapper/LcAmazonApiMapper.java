@@ -1,6 +1,7 @@
 package com.zhz.selenium.mapper;
 
 import com.zhz.selenium.pojo.ApiChildResult;
+import com.zhz.selenium.pojo.ApiOther;
 import com.zhz.selenium.pojo.ApiResult;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -14,13 +15,21 @@ public interface LcAmazonApiMapper {
 
     ApiChildResult selectSalesAsin(@Param("dateRange")Integer dateRange, @Param("asin")String asin);
 
+    ApiChildResult selectSellAsin(@Param("dateRange")Integer dateRange, @Param("asin")String asin);
+
     List<ApiResult> selectKeywordsAsin(@Param("dateRange")Integer dateRange,@Param("asin")String asin);
 
     List<ApiResult>  selectRankAsin(@Param("asin")String asin);
 
-    ApiResult  listingDetail(@Param("asin")String asin);
+    ApiResult  listingDetail(@Param("dateRange")Integer dateRange,@Param("asin")String asin);
 
 
     List<ApiChildResult> selectChildAsin(@Param("childAsin")String childAsin);
+
+    String getNewDate();
+
+    String selectRankSearchtermByNewDate(@Param("keyWord")String keyWord);
+
+    List<ApiOther> selectCampaignTarget (@Param("dateRange")Integer dateRange, @Param("asin")String  asin) ;
 
 }
