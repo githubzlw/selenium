@@ -187,13 +187,15 @@ public class LcAmazonApiController {
     public void excelExport(HttpServletResponse response,@RequestParam(value="daterange") Integer daterange,@RequestParam(value="asin") String asin) throws IOException {
 
         // daterange 加两天，因为美国时间数据还有抓到
-        daterange = daterange+2;
+        daterange = daterange+1;
         //产品标题,主图
         ApiResult resBean = lcAmazonApiService.listingDetail(daterange,asin);
 
         // 查询searchterm表数据库最新更新日期
         String newDate = lcAmazonApiService.getNewDate();
 
+        //SpApiReportNewDate
+        resBean.setSpDate(lcAmazonApiService.selectSpApiReportNewDate());
         //开始日期-结束日期
         resBean.setSeDate(resBean.getStartDate()+"/"+newDate);
         //数据库中最新更新日期
@@ -215,6 +217,8 @@ public class LcAmazonApiController {
             beanP.setChildDay7OtherSKUUnits(beanS.getChildDay7OtherSKUUnits());
             beanP.setChildDay7AdvertisedSKUUnits(beanS.getChildDay7AdvertisedSKUUnits());
             beanP.setChildDay7TotalUnits(beanS.getChildDay7TotalUnits());
+            beanP.setChildClicks(beanS.getChildClicks());
+            beanP.setChildSpend(beanS.getChildSpend());
         }
         childBeanList.add(beanP);
         // 传值进来的asin数据处理 end
@@ -230,6 +234,8 @@ public class LcAmazonApiController {
                     beanNew.setChildDay7OtherSKUUnits(beanSe.getChildDay7OtherSKUUnits());
                     beanNew.setChildDay7AdvertisedSKUUnits(beanSe.getChildDay7AdvertisedSKUUnits());
                     beanNew.setChildDay7TotalUnits(beanSe.getChildDay7TotalUnits());
+                    beanNew.setChildClicks(beanSe.getChildClicks());
+                    beanNew.setChildSpend(beanSe.getChildSpend());
                 }
 //                if(beanNew == null){
 //                    ApiChildResult beanN = new ApiChildResult();
@@ -307,25 +313,28 @@ public class LcAmazonApiController {
 
 
         //campaignName,keywordTarget集合数据
-        List<ApiOther> otLists = new ArrayList<>();
-        //传进来的asin
+//        List<ApiOther> otLists = new ArrayList<>();
+        //传进来的asin campaignName,keywordTarget查询
         List<ApiOther> pList = lcAmazonApiService.selectCampaignTarget(daterange,asin);
         if(!CollectionUtils.isEmpty(pList)){
-            otLists.addAll(pList);
+//            for(ApiOther obj:pList){
+//                obj.setPAsin(asin);
+//            }
+//            otLists.addAll(pList);
         }
-        // campaignName,keywordTarget查询
-        if(!CollectionUtils.isEmpty(childList)) {
-            for (ApiChildResult bean : childList) {
-                //子asin
-                List<ApiOther> ctLists = lcAmazonApiService.selectCampaignTarget(daterange,bean.getChildAsin());
-                if(!CollectionUtils.isEmpty(ctLists)){
-                    otLists.addAll(ctLists);
-                }
-            }
-        }
+//        // campaignName,keywordTarget查询
+//        if(!CollectionUtils.isEmpty(childList)) {
+//            for (ApiChildResult bean : childList) {
+//                //子asin
+//                List<ApiOther> ctLists = lcAmazonApiService.selectCampaignTarget(daterange,bean.getChildAsin());
+//                if(!CollectionUtils.isEmpty(ctLists)){
+//                    otLists.addAll(ctLists);
+//                }
+//            }
+//        }
 
         //excel处理
-        ExcelUtil.fillExcel(response,list,resBean,daterange-2,asin,childBeanList,otLists);
+        ExcelUtil.fillExcel(response,list,resBean,daterange-1,asin,childBeanList,pList);
 
     }
 

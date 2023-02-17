@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class ApiOther {
+
+    private String paramAsin;
     //
     private String campaignName;
     //

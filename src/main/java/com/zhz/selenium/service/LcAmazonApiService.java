@@ -25,6 +25,8 @@ public interface LcAmazonApiService {
 
     String getNewDate();
 
+    String selectSpApiReportNewDate();
+
     String selectRankSearchtermByNewDate(String keyWord);
 
     List<ApiOther> selectCampaignTarget(Integer dateRange, String asin) ;

@@ -28,6 +28,8 @@ public interface LcAmazonApiMapper {
 
     String getNewDate();
 
+    String selectSpApiReportNewDate();
+
     String selectRankSearchtermByNewDate(@Param("keyWord")String keyWord);
 
     List<ApiOther> selectCampaignTarget (@Param("dateRange")Integer dateRange, @Param("asin")String  asin) ;

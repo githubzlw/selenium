@@ -76,6 +76,18 @@ public class LcAmazonApiServiceImpl implements LcAmazonApiService {
     }
 
     @Override
+    public String selectSpApiReportNewDate() {
+        try {
+            String newDate = lcAmazonApiMapper.selectSpApiReportNewDate();
+            return newDate;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    @Override
     public List<ApiResult> selectKeywordsAsin(Integer dateRange,String asin) {
         try {
             List<ApiResult> maps = lcAmazonApiMapper.selectKeywordsAsin(dateRange,asin);

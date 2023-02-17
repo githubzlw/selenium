@@ -9,7 +9,7 @@ public class ApiChildResult {
     private String childAsin;
     //Session数(自然流量 sp api)
     private Integer childAsinSession;
-    //总订单数(sp api)
+    //商品销售数量(sp api)
     private Integer childUnitOrder;
     //总广告点击数 (该ASIN所在Campaign的)
     private Integer childClicks;
@@ -25,6 +25,9 @@ public class ApiChildResult {
     private Integer childDay7AdvertisedSKUUnits;
     //广告Unit Sell -Other ASINsum
     private Integer childDay7TotalUnits;
+    //总订单数量(sp api)
+    private Integer childTotalOrderItems;
+
 
     public ApiChildResult(){
 

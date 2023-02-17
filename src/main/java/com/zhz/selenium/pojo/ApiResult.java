@@ -40,6 +40,8 @@ public class ApiResult {
     private String newDate;
     //开始时间-结束时间
     private String seDate;
+    //spApi最新更新时间
+    private String spDate;
 
     public ApiResult(String amzAsin, String zrPm, String ggPm) {
         this.amzAsin=amzAsin;
