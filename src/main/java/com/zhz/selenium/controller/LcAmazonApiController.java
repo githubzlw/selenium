@@ -226,7 +226,7 @@ public class LcAmazonApiController {
         if(!CollectionUtils.isEmpty(childList)){
             for(ApiChildResult bean : childList){
                 ApiChildResult beanNew = new ApiChildResult();
-                        //返回这段时间的 Session数(自然流量 sp api), 总订单数(sp api)，总广告点击数 (该ASIN所在Campaign的) ，广告花费 和 广告订单数 等
+                //返回这段时间的 Session数(自然流量 sp api), 总订单数(sp api)，总广告点击数 (该ASIN所在Campaign的) ，广告花费 和 广告订单数 等
                 beanNew = lcAmazonApiService.selectSalesAsin(daterange, bean.getChildAsin());
                 ApiChildResult beanSe = lcAmazonApiService.selectSellAsin(daterange, bean.getChildAsin());
                 if(beanNew != null){
@@ -237,20 +237,6 @@ public class LcAmazonApiController {
                     beanNew.setChildClicks(beanSe.getChildClicks());
                     beanNew.setChildSpend(beanSe.getChildSpend());
                 }
-//                if(beanNew == null){
-//                    ApiChildResult beanN = new ApiChildResult();
-//                    beanN.setChildAsin(bean.getChildAsin());
-//                    beanN.setChildAsinSession(0);
-//                    beanN.setChildClicks(0);
-//                    beanN.setChildDay7AdvertisedSKUUnits(0);
-//                    beanN.setChildDay7OtherSKUUnits(0);
-//                    beanN.setChildDay7TotalOrders(0);
-//                    beanN.setChildImpressions(0);
-//                    beanN.setChildSpend("0");
-//                    beanN.setChildUnitOrder(0);
-//                    beanN.setChildDay7TotalUnits(0);
-//                    childBeanList.add(beanN);
-//                }
                 childBeanList.add(beanNew);
             }
 
@@ -313,25 +299,8 @@ public class LcAmazonApiController {
 
 
         //campaignName,keywordTarget集合数据
-//        List<ApiOther> otLists = new ArrayList<>();
-        //传进来的asin campaignName,keywordTarget查询
+        //传进来的asin campaignName,keywordTarget，click
         List<ApiOther> pList = lcAmazonApiService.selectCampaignTarget(daterange,asin);
-        if(!CollectionUtils.isEmpty(pList)){
-//            for(ApiOther obj:pList){
-//                obj.setPAsin(asin);
-//            }
-//            otLists.addAll(pList);
-        }
-//        // campaignName,keywordTarget查询
-//        if(!CollectionUtils.isEmpty(childList)) {
-//            for (ApiChildResult bean : childList) {
-//                //子asin
-//                List<ApiOther> ctLists = lcAmazonApiService.selectCampaignTarget(daterange,bean.getChildAsin());
-//                if(!CollectionUtils.isEmpty(ctLists)){
-//                    otLists.addAll(ctLists);
-//                }
-//            }
-//        }
 
         //excel处理
         ExcelUtil.fillExcel(response,list,resBean,daterange-1,asin,childBeanList,pList);

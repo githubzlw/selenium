@@ -10,5 +10,7 @@ public class ApiOther {
     private String campaignName;
     //
     private String keywordTarget;
+    private String campaignClicks;
+
 
 }

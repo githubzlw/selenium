@@ -85,9 +85,14 @@ public class ExcelUtil {
         out.flush();
 
     }
-
-
-    // 图片处理
+    
+    /**
+     * 图片填充方法
+     * @param imagePath
+     * @return WriteCellData
+     * @author zlw
+     * @since 2023/2/17 15:46
+     */
     public static WriteCellData handleImage(String imagePath) {
         WriteCellData<Void> writeCellData = new WriteCellData<>();
 
